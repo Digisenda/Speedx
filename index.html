@@ -1,994 +1,157 @@
 <!DOCTYPE html>
-html lang=es
-head
-  meta charset=UTF-8
-  meta name=viewport content=width=device-width, initial-scale=1.0, user-scalable=no
-  titleSPEEDX - Control de Trabajotitle
-  
-  !-- PWA Meta Tags --
-  meta name=theme-color content=#2563EB
-  meta name=mobile-web-app-capable content=yes
-  meta name=apple-mobile-web-app-capable content=yes
-  meta name=apple-mobile-web-app-status-bar-style content=default
-  meta name=apple-mobile-web-app-title content=SPEEDX
-  
-  !-- Manifest --
-  link rel=manifest href=dataapplicationjson;charset=utf-8,%7B%22name%22%3A%22SPEEDX%20Control%20de%20Trabajo%22%2C%22short_name%22%3A%22SPEEDX%22%2C%22description%22%3A%22Dashboard%20de%20control%20de%20entregas%20SPEEDX%22%2C%22start_url%22%3A%22%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%232563EB%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimagesvg%2Bxml%3Bbase64%2CPD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjE5MnB4IiBoZWlnaHQ9IjE5MnB4IiB2aWV3Qm94PSIwIDAgMTkyIDE5MiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMTkyIDE5MjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8cmVjdCBmaWxsPSIjMjU2M0VCIiB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIvPgo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNNDgsMTI4aDk2YzguOCwwLDE2LTcuMiwxNi0xNlY4MGMwLTguOC03LjItMTYtMTYtMTZINDhjLTguOCwwLTE2LDcuMi0xNiwxNnYzMkMzMiwxMjAuOCwzOS4yLDEyOCw0OCwxMjh6Ii8%2BCjwvc3ZnPgo%3D%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22imagesvg%2Bxml%22%7D%5D%7D
-  
-  !-- Icons (usando emoji como fallback) --
-  link rel=icon href=dataimagesvg+xml,svg xmlns=%22httpwww.w3.org2000svg%22 viewBox=%220 0 100 100%22text y=%22.9em%22 font-size=%2290%22🚚textsvg
-  
-  style
-     {
-      margin 0;
-      padding 0;
-      box-sizing border-box;
-    }
-    
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>SPEEDX - Control de Trabajo</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#2563EB" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="SPEEDX" />
+
+  <!-- Manifest (embebido como data URL; start_url relativo para que funcione en Pages) -->
+  <link rel="manifest" href='data:application/json;charset=utf-8,{"name":"SPEEDX Control de Trabajo","short_name":"SPEEDX","description":"Dashboard de control de entregas SPEEDX","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#2563EB","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTkyIDE5MiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCBmaWxsPSIjMjU2M0VCIiB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIvPjx0ZXh0IHg9Ijk2IiB5PSIxMDAiIGZpbGw9IiNGRkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNjBweCI+8J+RrzwvdGV4dD48L3N2Zz4=","sizes":"192x192","type":"image/svg+xml"}]}' />
+
+  <!-- Icono (emoji fallback) -->
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚚</text></svg>'>
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height 100vh;
-      color #333;
-      -webkit-font-smoothing antialiased;
-      -webkit-tap-highlight-color transparent;
-      user-select none;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      min-height:100vh; color:#333; -webkit-font-smoothing:antialiased;
+      -webkit-tap-highlight-color:transparent; user-select:none;
     }
-    
-    .app-container {
-      max-width 100vw;
-      padding 10px;
-      min-height 100vh;
-    }
-    
+    .app-container { max-width:100vw; padding:10px; min-height:100vh; }
     .header {
-      background rgba(255, 255, 255, 0.95);
-      backdrop-filter blur(10px);
-      border-radius 20px;
-      padding 20px;
-      margin-bottom 15px;
-      text-align center;
-      box-shadow 0 8px 32px rgba(0, 0, 0, 0.1);
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:20px; padding:20px; margin-bottom:15px; text-align:center;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
     }
-    
-    .header h1 {
-      color #2563EB;
-      font-size 1.8rem;
-      font-weight 800;
-      margin-bottom 5px;
-    }
-    
-    .header p {
-      color #6B7280;
-      font-size 0.9rem;
-    }
-    
-    .kpi-grid {
-      display grid;
-      grid-template-columns 1fr 1fr;
-      gap 10px;
-      margin-bottom 20px;
-    }
-    
+    .header h1 { color:#2563EB; font-size:1.8rem; font-weight:800; margin-bottom:5px; }
+    .header p { color:#6B7280; font-size:.9rem; }
+    .kpi-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
     .kpi-card {
-      background rgba(255, 255, 255, 0.95);
-      backdrop-filter blur(10px);
-      border-radius 16px;
-      padding 20px 15px;
-      text-align center;
-      box-shadow 0 8px 32px rgba(0, 0, 0, 0.1);
-      position relative;
-      overflow hidden;
+      --accent-color:#3B82F6;
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:20px 15px; text-align:center; position:relative; overflow:hidden;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
     }
-    
-    .kpi-cardbefore {
-      content '';
-      position absolute;
-      top 0;
-      left 0;
-      right 0;
-      height 4px;
-      background var(--accent-color);
-    }
-    
-    .kpi-card.packages {
-      --accent-color #3B82F6;
-    }
-    
-    .kpi-card.earnings {
-      --accent-color #10B981;
-    }
-    
-    .kpi-card.deliveries {
-      --accent-color #8B5CF6;
-    }
-    
-    .kpi-card.efficiency {
-      --accent-color #F59E0B;
-    }
-    
-    .kpi-icon {
-      font-size 2.5rem;
-      margin-bottom 8px;
-      display block;
-    }
-    
-    .kpi-value {
-      font-size 1.8rem;
-      font-weight 700;
-      color #1F2937;
-      margin-bottom 4px;
-    }
-    
-    .kpi-label {
-      font-size 0.8rem;
-      color #6B7280;
-      margin-bottom 4px;
-    }
-    
-    .kpi-subtitle {
-      font-size 0.7rem;
-      color #10B981;
-      font-weight 600;
-    }
-    
+    .kpi-card.packages { --accent-color:#3B82F6; }
+    .kpi-card.earnings { --accent-color:#10B981; }
+    .kpi-card.deliveries { --accent-color:#8B5CF6; }
+    .kpi-card.efficiency { --accent-color:#F59E0B; }
+    .kpi-card::before { content:""; position:absolute; top:0; left:0; right:0; height:4px; background:var(--accent-color); }
+    .kpi-icon { font-size:2.5rem; margin-bottom:8px; display:block; }
+    .kpi-value { font-size:1.8rem; font-weight:700; color:#1F2937; margin-bottom:4px; }
+    .kpi-label { font-size:.8rem; color:#6B7280; margin-bottom:4px; }
+    .kpi-subtitle { font-size:.7rem; color:#10B981; font-weight:600; }
+
     .chart-container {
-      background rgba(255, 255, 255, 0.95);
-      backdrop-filter blur(10px);
-      border-radius 16px;
-      padding 20px 15px;
-      margin-bottom 20px;
-      box-shadow 0 8px 32px rgba(0, 0, 0, 0.1);
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:20px 15px; margin-bottom:20px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
     }
-    
-    .chart-title {
-      font-size 1.1rem;
-      font-weight 600;
-      color #1F2937;
-      margin-bottom 15px;
-      text-align center;
-    }
-    
-    .simple-chart {
-      height 150px;
-      display flex;
-      align-items end;
-      justify-content space-around;
-      padding 10px;
-    }
-    
-    .chart-bar {
-      background linear-gradient(to top, #3B82F6, #60A5FA);
-      border-radius 4px 4px 0 0;
-      min-width 30px;
-      position relative;
-      margin 0 2px;
-    }
-    
-    .chart-bar.delivered {
-      background linear-gradient(to top, #10B981, #34D399);
-    }
-    
-    .chart-bar.not-delivered {
-      background linear-gradient(to top, #EF4444, #F87171);
-    }
-    
+    .chart-title { font-size:1.1rem; font-weight:600; color:#1F2937; margin-bottom:15px; text-align:center; }
+    .simple-chart { height:150px; display:flex; align-items:flex-end; justify-content:space-around; padding:10px; }
+    .chart-bar { border-radius:4px 4px 0 0; min-width:30px; position:relative; margin:0 2px; }
+    .chart-bar.delivered { background:linear-gradient(to top,#10B981,#34D399); }
+    .chart-bar.not-delivered { background:linear-gradient(to top,#EF4444,#F87171); }
     .chart-label {
-      position absolute;
-      bottom -25px;
-      left 50%;
-      transform translateX(-50%);
-      font-size 0.7rem;
-      color #6B7280;
-      white-space nowrap;
+      position:absolute; bottom:-25px; left:50%; transform:translateX(-50%);
+      font-size:.7rem; color:#6B7280; white-space:nowrap;
     }
-    
-    .actions-grid {
-      display grid;
-      grid-template-columns 1fr 1fr;
-      gap 10px;
-      margin-bottom 20px;
-    }
-    
+
+    .actions-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
     .action-btn {
-      background rgba(255, 255, 255, 0.95);
-      backdrop-filter blur(10px);
-      border none;
-      border-radius 16px;
-      padding 20px;
-      display flex;
-      flex-direction column;
-      align-items center;
-      gap 8px;
-      box-shadow 0 8px 32px rgba(0, 0, 0, 0.1);
-      cursor pointer;
-      transition all 0.3s ease;
-      text-decoration none;
-      color inherit;
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border:none; border-radius:16px; padding:20px; display:flex; flex-direction:column;
+      align-items:center; gap:8px; box-shadow:0 8px 32px rgba(0,0,0,0.1);
+      cursor:pointer; transition:.3s; text-decoration:none; color:inherit;
     }
-    
-    .action-btnactive {
-      transform scale(0.95);
-      box-shadow 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-    
-    .action-icon {
-      font-size 2rem;
-    }
-    
-    .action-text {
-      font-size 0.9rem;
-      font-weight 600;
-      color #1F2937;
-    }
-    
+    .action-btn:active { transform:scale(0.95); box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+    .action-icon { font-size:2rem; }
+    .action-text { font-size:.9rem; font-weight:600; color:#1F2937; }
+
     .data-table {
-      background rgba(255, 255, 255, 0.95);
-      backdrop-filter blur(10px);
-      border-radius 16px;
-      padding 15px;
-      box-shadow 0 8px 32px rgba(0, 0, 0, 0.1);
-      margin-bottom 20px;
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:15px; box-shadow:0 8px 32px rgba(0,0,0,0.1); margin-bottom:20px;
     }
-    
-    .table-header {
-      display flex;
-      justify-content space-between;
-      align-items center;
-      margin-bottom 15px;
-    }
-    
-    .table-title {
-      font-size 1.1rem;
-      font-weight 600;
-      color #1F2937;
-    }
-    
-    .record-item {
-      background #F9FAFB;
-      border-radius 12px;
-      padding 15px;
-      margin-bottom 10px;
-      border-left 4px solid #3B82F6;
-    }
-    
-    .record-header {
-      display flex;
-      justify-content space-between;
-      align-items center;
-      margin-bottom 10px;
-    }
-    
-    .record-date {
-      font-weight 600;
-      color #1F2937;
-    }
-    
-    .record-earnings {
-      font-weight 700;
-      color #10B981;
-    }
-    
-    .record-details {
-      display grid;
-      grid-template-columns 1fr 1fr;
-      gap 8px;
-      font-size 0.8rem;
-      color #6B7280;
-    }
-    
-    .modal {
-      position fixed;
-      top 0;
-      left 0;
-      right 0;
-      bottom 0;
-      background rgba(0, 0, 0, 0.5);
-      z-index 1000;
-      display flex;
-      align-items center;
-      justify-content center;
-      padding 20px;
-    }
-    
-    .modal-content {
-      background white;
-      border-radius 16px;
-      padding 20px;
-      width 100%;
-      max-width 400px;
-      max-height 80vh;
-      overflow-y auto;
-    }
-    
-    .modal-header {
-      display flex;
-      justify-content space-between;
-      align-items center;
-      margin-bottom 20px;
-    }
-    
-    .modal-title {
-      font-size 1.2rem;
-      font-weight 600;
-      color #1F2937;
-    }
-    
-    .close-btn {
-      background none;
-      border none;
-      font-size 1.5rem;
-      cursor pointer;
-      color #6B7280;
-    }
-    
-    .form-grid {
-      display grid;
-      gap 15px;
-    }
-    
-    .form-group {
-      display flex;
-      flex-direction column;
-      gap 5px;
-    }
-    
-    .form-label {
-      font-size 0.9rem;
-      font-weight 500;
-      color #374151;
-    }
-    
-    .form-input {
-      border 2px solid #E5E7EB;
-      border-radius 8px;
-      padding 12px;
-      font-size 1rem;
-      transition border-color 0.3s ease;
-    }
-    
-    .form-inputfocus {
-      outline none;
-      border-color #3B82F6;
-    }
-    
-    .form-actions {
-      display flex;
-      gap 10px;
-      margin-top 20px;
-    }
-    
-    .btn {
-      border none;
-      border-radius 8px;
-      padding 12px 20px;
-      font-size 1rem;
-      font-weight 600;
-      cursor pointer;
-      transition all 0.3s ease;
-      flex 1;
-    }
-    
-    .btn-primary {
-      background #3B82F6;
-      color white;
-    }
-    
-    .btn-primaryactive {
-      background #2563EB;
-    }
-    
-    .btn-secondary {
-      background #E5E7EB;
-      color #374151;
-    }
-    
-    .btn-secondaryactive {
-      background #D1D5DB;
-    }
-    
-    .hidden {
-      display none !important;
-    }
-    
-    .stats-row {
-      display grid;
-      grid-template-columns 1fr 1fr 1fr;
-      gap 15px;
-      margin-top 20px;
-    }
-    
-    .stat-item {
-      background rgba(255, 255, 255, 0.95);
-      backdrop-filter blur(10px);
-      border-radius 12px;
-      padding 15px;
-      text-align center;
-      box-shadow 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stat-value {
-      font-size 1.2rem;
-      font-weight 700;
-      color #1F2937;
-    }
-    
-    .stat-label {
-      font-size 0.7rem;
-      color #6B7280;
-      margin-top 4px;
-    }
-    
+    .table-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+    .table-title { font-size:1.1rem; font-weight:600; color:#1F2937; }
+
+    .record-item { background:#F9FAFB; border-radius:12px; padding:15px; margin-bottom:10px; border-left:4px solid #3B82F6; }
+    .record-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .record-date { font-weight:600; color:#1F2937; }
+    .record-earnings { font-weight:700; color:#10B981; }
+    .record-details { display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:.8rem; color:#6B7280; }
+
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; }
+    .modal.open { display:flex; }
+    .modal-content { background:#fff; border-radius:16px; padding:20px; width:100%; max-width:400px; max-height:80vh; overflow-y:auto; }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+    .modal-title { font-size:1.2rem; font-weight:600; color:#1F2937; }
+    .close-btn { background:none; border:none; font-size:1.5rem; cursor:pointer; color:#6B7280; }
+
+    .form-grid { display:grid; gap:15px; }
+    .form-group { display:flex; flex-direction:column; gap:5px; }
+    .form-label { font-size:.9rem; font-weight:500; color:#374151; }
+    .form-input { border:2px solid #E5E7EB; border-radius:8px; padding:12px; font-size:1rem; transition:border-color .3s; }
+    .form-input:focus { outline:none; border-color:#3B82F6; }
+
+    .form-actions { display:flex; gap:10px; margin-top:20px; }
+    .btn { border:none; border-radius:8px; padding:12px 20px; font-size:1rem; font-weight:600; cursor:pointer; transition:.3s; flex:1; }
+    .btn-primary { background:#3B82F6; color:#fff; }
+    .btn-primary:active { background:#2563EB; }
+    .btn-secondary { background:#E5E7EB; color:#374151; }
+    .btn-secondary:active { background:#D1D5DB; }
+
+    .hidden { display:none !important; }
+
+    .stats-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-top:20px; }
+    .stat-item { background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); border-radius:12px; padding:15px; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+    .stat-value { font-size:1.2rem; font-weight:700; color:#1F2937; }
+    .stat-label { font-size:.7rem; color:#6B7280; margin-top:4px; }
+
     .install-banner {
-      background linear-gradient(90deg, #3B82F6, #1D4ED8);
-      color white;
-      padding 15px;
-      border-radius 12px;
-      margin-bottom 20px;
-      text-align center;
-      position relative;
-      overflow hidden;
+      background:linear-gradient(90deg,#3B82F6,#1D4ED8); color:#fff; padding:15px; border-radius:12px; margin-bottom:20px; text-align:center; position:relative; overflow:hidden;
     }
-    
-    .install-bannerbefore {
-      content '📱';
-      position absolute;
-      right -10px;
-      top 50%;
-      transform translateY(-50%);
-      font-size 3rem;
-      opacity 0.3;
+    .install-banner::before { content:'📱'; position:absolute; right:-10px; top:50%; transform:translateY(-50%); font-size:3rem; opacity:.3; }
+    .install-text { font-weight:600; margin-bottom:8px; }
+    .install-description { font-size:.8rem; opacity:.9; }
+
+    /* Responsive */
+    @media (max-width:360px){
+      .kpi-grid { grid-template-columns:1fr; }
+      .actions-grid { grid-template-columns:1fr; }
+      .stats-row { grid-template-columns:1fr 1fr; }
     }
-    
-    .install-text {
-      font-weight 600;
-      margin-bottom 8px;
+    /* Dark mode */
+    @media (prefers-color-scheme:dark){
+      body { background:linear-gradient(135deg,#1E293B 0%,#0F172A 100%); color:#F1F5F9; }
+      .kpi-card,.chart-container,.action-btn,.data-table,.stat-item,.modal-content { background:rgba(30,41,59,0.95); color:#F1F5F9; }
+      .kpi-value,.modal-title,.table-title,.record-date { color:#F1F5F9; }
+      .kpi-label,.kpi-subtitle,.record-details { color:#CBD5E1; }
     }
-    
-    .install-description {
-      font-size 0.8rem;
-      opacity 0.9;
-    }
-    
-     PWA Responsive adjustments 
-    @media (max-width 360px) {
-      .kpi-grid {
-        grid-template-columns 1fr;
-      }
-      
-      .actions-grid {
-        grid-template-columns 1fr;
-      }
-      
-      .stats-row {
-        grid-template-columns 1fr 1fr;
-      }
-    }
-    
-     Dark mode support 
-    @media (prefers-color-scheme dark) {
-      body {
-        background linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
-      }
-      
-      .kpi-card, .chart-container, .action-btn, .data-table, .stat-item {
-        background rgba(30, 41, 59, 0.95);
-        color #F1F5F9;
-      }
-      
-      .kpi-value, .modal-title, .table-title, .record-date {
-        color #F1F5F9;
-      }
-      
-      .kpi-label, .kpi-subtitle, .record-details {
-        color #CBD5E1;
-      }
-    }
-  style
-head
-body
-  div class=app-container id=app
-    !-- Install Banner --
-    div class=install-banner id=installBanner
-      div class=install-text¡Instala SPEEDX en tu móvil!div
-      div class=install-descriptionAcceso rápido desde tu pantalla de iniciodiv
-    div
+  </style>
+</head>
+<body>
+  <div class="app-container" id="app">
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner">
+      <div class="install-text">¡Instala SPEEDX en tu móvil!</div>
+      <div class="install-description">Acceso rápido desde tu pantalla de inicio</div>
+    </div>
 
-    !-- Header --
-    div class=header
-      h1🚚 SPEEDXh1
-      pControl de Trabajo Mobilep
-    div
+    <!-- Header -->
+    <div class="header">
+      <h1>🚚 SPEEDX</h1>
+      <p>Control de Trabajo Mobile</p>
+    </div>
 
-    !-- KPIs Grid --
-    div class=kpi-grid
-      div class=kpi-card packages
-        span class=kpi-icon📦span
-        div class=kpi-value id=totalPackages22div
-        div class=kpi-labelPaquetesdiv
-        div class=kpi-subtitle id=deliveryRate95.5%div
-      div
-      
-      div class=kpi-card earnings
-        span class=kpi-icon💰span
-        div class=kpi-value id=totalEarnings$20.07div
-        div class=kpi-labelGananciasdiv
-        div class=kpi-subtitle id=margin42.1%div
-      div
-      
-      div class=kpi-card deliveries
-        span class=kpi-icon✅span
-        div class=kpi-value id=delivered21div
-        div class=kpi-labelEntregadosdiv
-        div class=kpi-subtitlede 22 totaldiv
-      div
-      
-      div class=kpi-card efficiency
-        span class=kpi-icon🛣️span
-        div class=kpi-value id=totalMiles160div
-        div class=kpi-labelMillasdiv
-        div class=kpi-subtitle id=efficiency7.62 paq100midiv
-      div
-    div
-
-    !-- Simple Chart --
-    div class=chart-container
-      div class=chart-title📊 Rendimiento de Entregasdiv
-      div class=simple-chart
-        div class=chart-bar delivered style=height 90% id=deliveredBar
-          div class=chart-labelEntregadosdiv
-        div
-        div class=chart-bar not-delivered style=height 10% id=notDeliveredBar
-          div class=chart-labelNo Entregadosdiv
-        div
-      div
-    div
-
-    !-- Quick Actions --
-    div class=actions-grid
-      button class=action-btn onclick=openModal('addModal')
-        span class=action-icon➕span
-        span class=action-textAgregar Díaspan
-      button
-      
-      button class=action-btn onclick=openModal('statsModal')
-        span class=action-icon📈span
-        span class=action-textEstadísticasspan
-      button
-    div
-
-    !-- Recent Records --
-    div class=data-table
-      div class=table-header
-        div class=table-title📋 Registros Recientesdiv
-      div
-      div id=recordsList
-        !-- Records will be populated here --
-      div
-    div
-
-    !-- Additional Stats --
-    div class=stats-row
-      div class=stat-item
-        div class=stat-value id=avgPerMile7.62div
-        div class=stat-labelPaq100midiv
-      div
-      div class=stat-item
-        div class=stat-value id=fuelEfficiency2.44div
-        div class=stat-labelPaqGalóndiv
-      div
-      div class=stat-item
-        div class=stat-value id=costPerPackage$1.09div
-        div class=stat-labelCostoPaqdiv
-      div
-    div
-  div
-
-  !-- Add Record Modal --
-  div class=modal hidden id=addModal
-    div class=modal-content
-      div class=modal-header
-        div class=modal-title➕ Nuevo Registrodiv
-        button class=close-btn onclick=closeModal('addModal')&times;button
-      div
-      form id=addForm class=form-grid
-        div class=form-group
-          label class=form-labelFechalabel
-          input type=date class=form-input id=fecha required
-        div
-        div class=form-group
-          label class=form-labelTotal Paqueteslabel
-          input type=number class=form-input id=totalPaq required
-        div
-        div class=form-group
-          label class=form-labelPrecio por Paquete ($)label
-          input type=number step=0.01 class=form-input id=precio required
-        div
-        div class=form-group
-          label class=form-labelZonalabel
-          input type=text class=form-input id=zona placeholder=Centro, Norte, etc.
-        div
-        div class=form-group
-          label class=form-labelEntregadoslabel
-          input type=number class=form-input id=entregados required
-        div
-        div class=form-group
-          label class=form-labelNo Entregadoslabel
-          input type=number class=form-input id=noEntregados value=0
-        div
-        div class=form-group
-          label class=form-labelMillas Totaleslabel
-          input type=number class=form-input id=millas required
-        div
-        div class=form-group
-          label class=form-labelCombustible (Galones)label
-          input type=number step=0.01 class=form-input id=combustible required
-        div
-        div class=form-group
-          label class=form-labelCostos Totales ($)label
-          input type=number step=0.01 class=form-input id=costos required
-        div
-        div class=form-actions
-          button type=submit class=btn btn-primary💾 Guardarbutton
-          button type=button class=btn btn-secondary onclick=closeModal('addModal')❌ Cancelarbutton
-        div
-      form
-    div
-  div
-
-  !-- Stats Modal --
-  div class=modal hidden id=statsModal
-    div class=modal-content
-      div class=modal-header
-        div class=modal-title📈 Estadísticas Detalladasdiv
-        button class=close-btn onclick=closeModal('statsModal')&times;button
-      div
-      div id=detailedStats
-        !-- Detailed stats will be populated here --
-      div
-    div
-  div
-
-  script
-     App Data Storage
-    let appData = {
-      records [
-        {
-          id 1,
-          fecha '2025-08-25',
-          totalPaq 22,
-          precio 2.67,
-          zona 'Centro',
-          entregados 21,
-          noEntregados 1,
-          horaInicio '1000',
-          horaFinal '1700',
-          millas 160,
-          combustible 9,
-          costos 24.03,
-          promedioMilla 7.62,
-          promedioCombustible 0.43,
-          gananciaReal 20.07
-        }
-      ]
-    };
-
-     Load data from localStorage
-    function loadData() {
-      const saved = localStorage.getItem('speedxData');
-      if (saved) {
-        appData = JSON.parse(saved);
-      }
-      updateUI();
-    }
-
-     Save data to localStorage
-    function saveData() {
-      localStorage.setItem('speedxData', JSON.stringify(appData));
-    }
-
-     Calculate metrics for a record
-    function calculateMetrics(record) {
-      const totalPaq = parseFloat(record.totalPaq  0);
-      const millas = parseFloat(record.millas  0);
-      const combustible = parseFloat(record.combustible  0);
-      const precio = parseFloat(record.precio  0);
-      const costos = parseFloat(record.costos  0);
-      
-      return {
-        ...record,
-        promedioMilla millas  0  (totalPaq  millas  100).toFixed(2)  0,
-        promedioCombustible combustible  0  (totalPaq  combustible).toFixed(2)  0,
-        gananciaReal (precio  totalPaq - costos).toFixed(2)
-      };
-    }
-
-     Update UI with current data
-    function updateUI() {
-      const totals = appData.records.reduce((acc, record) = {
-        acc.totalPackages += parseInt(record.totalPaq  0);
-        acc.totalDelivered += parseInt(record.entregados  0);
-        acc.totalNotDelivered += parseInt(record.noEntregados  0);
-        acc.totalMiles += parseInt(record.millas  0);
-        acc.totalEarnings += parseFloat(record.gananciaReal  0);
-        acc.totalCosts += parseFloat(record.costos  0);
-        acc.totalRevenue += parseFloat(record.precio  0)  parseInt(record.totalPaq  0);
-        return acc;
-      }, {
-        totalPackages 0,
-        totalDelivered 0,
-        totalNotDelivered 0,
-        totalMiles 0,
-        totalEarnings 0,
-        totalCosts 0,
-        totalRevenue 0
-      });
-
-       Update KPIs
-      document.getElementById('totalPackages').textContent = totals.totalPackages;
-      document.getElementById('totalEarnings').textContent = '$' + totals.totalEarnings.toFixed(2);
-      document.getElementById('delivered').textContent = totals.totalDelivered;
-      document.getElementById('totalMiles').textContent = totals.totalMiles;
-
-      const deliveryRate = totals.totalPackages  0  (totals.totalDelivered  totals.totalPackages  100).toFixed(1)  0;
-      const margin = totals.totalRevenue  0  (totals.totalEarnings  totals.totalRevenue  100).toFixed(1)  0;
-      const efficiency = totals.totalMiles  0  (totals.totalPackages  totals.totalMiles  100).toFixed(2)  0;
-
-      document.getElementById('deliveryRate').textContent = deliveryRate + '%';
-      document.getElementById('margin').textContent = margin + '%';
-      document.getElementById('efficiency').textContent = efficiency + ' paq100mi';
-
-       Update chart
-      const deliveredPercent = totals.totalPackages  0  (totals.totalDelivered  totals.totalPackages  100)  0;
-      const notDeliveredPercent = 100 - deliveredPercent;
-      
-      document.getElementById('deliveredBar').style.height = Math.max(deliveredPercent, 5) + '%';
-      document.getElementById('notDeliveredBar').style.height = Math.max(notDeliveredPercent, 5) + '%';
-
-       Update stats
-      document.getElementById('avgPerMile').textContent = efficiency;
-      const fuelEff = appData.records.reduce((sum, r) = sum + parseFloat(r.combustible  0), 0);
-      document.getElementById('fuelEfficiency').textContent = fuelEff  0  (totals.totalPackages  fuelEff).toFixed(2)  '0.00';
-      document.getElementById('costPerPackage').textContent = '$' + (totals.totalPackages  0  (totals.totalCosts  totals.totalPackages).toFixed(2)  '0.00');
-
-       Update records list
-      updateRecordsList();
-    }
-
-     Update records list
-    function updateRecordsList() {
-      const container = document.getElementById('recordsList');
-      const recentRecords = appData.records.slice(-5).reverse();  Last 5 records
-      
-      container.innerHTML = recentRecords.map(record = `
-        div class=record-item
-          div class=record-header
-            div class=record-date${formatDate(record.fecha)}div
-            div class=record-earnings$${record.gananciaReal}div
-          div
-          div class=record-details
-            div📦 ${record.totalPaq} paquetesdiv
-            div✅ ${record.entregados} entregadosdiv
-            div🛣️ ${record.millas} millasdiv
-            div📍 ${record.zona  'NA'}div
-          div
-        div
-      `).join('');
-    }
-
-     Format date
-    function formatDate(dateStr) {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('es-ES', { day '2-digit', month '2-digit' });
-    }
-
-     Modal functions
-    function openModal(modalId) {
-      document.getElementById(modalId).classList.remove('hidden');
-      if (modalId === 'addModal') {
-        document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-      }
-      if (modalId === 'statsModal') {
-        updateDetailedStats();
-      }
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.add('hidden');
-      if (modalId === 'addModal') {
-        document.getElementById('addForm').reset();
-      }
-    }
-
-     Update detailed stats
-    function updateDetailedStats() {
-      const totals = appData.records.reduce((acc, record) = {
-        acc.totalPackages += parseInt(record.totalPaq  0);
-        acc.totalDelivered += parseInt(record.entregados  0);
-        acc.totalMiles += parseInt(record.millas  0);
-        acc.totalEarnings += parseFloat(record.gananciaReal  0);
-        acc.totalCosts += parseFloat(record.costos  0);
-        acc.totalFuel += parseFloat(record.combustible  0);
-        return acc;
-      }, { totalPackages 0, totalDelivered 0, totalMiles 0, totalEarnings 0, totalCosts 0, totalFuel 0 });
-
-      const avgEarningsPerDay = appData.records.length  0  (totals.totalEarnings  appData.records.length).toFixed(2)  0;
-      const avgPackagesPerDay = appData.records.length  0  (totals.totalPackages  appData.records.length).toFixed(1)  0;
-      const milesPerGallon = totals.totalFuel  0  (totals.totalMiles  totals.totalFuel).toFixed(2)  0;
-
-      document.getElementById('detailedStats').innerHTML = `
-        div class=stats-row
-          div class=stat-item
-            div class=stat-value${avgEarningsPerDay}div
-            div class=stat-label$día promediodiv
-          div
-          div class=stat-item
-            div class=stat-value${avgPackagesPerDay}div
-            div class=stat-labelpaqdía promediodiv
-          div
-          div class=stat-item
-            div class=stat-value${milesPerGallon}div
-            div class=stat-labelmillasgalóndiv
-          div
-        div
-        div style=margin-top 20px; padding 15px; background #F3F4F6; border-radius 8px;
-          h4 style=margin-bottom 10px; color #374151;📊 Resumen Totalh4
-          div style=font-size 0.9rem; color #6B7280; line-height 1.5;
-            • Total días trabajados ${appData.records.length}br
-            • Total paquetes manejados ${totals.totalPackages}br
-            • Tasa de entrega ${(totals.totalDeliveredtotals.totalPackages100).toFixed(1)}%br
-            • Millas totales recorridas ${totals.totalMiles}br
-            • Ganancias totales $${totals.totalEarnings.toFixed(2)}br
-            • ROI promedio ${totals.totalCosts  0  ((totals.totalEarningstotals.totalCosts)100).toFixed(1)  0}%
-          div
-        div
-      `;
-    }
-
-     Handle form submission
-    document.getElementById('addForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const newRecord = {
-        id Date.now(),
-        fecha document.getElementById('fecha').value,
-        totalPaq parseInt(document.getElementById('totalPaq').value),
-        precio parseFloat(document.getElementById('precio').value),
-        zona document.getElementById('zona').value,
-        entregados parseInt(document.getElementById('entregados').value),
-        noEntregados parseInt(document.getElementById('noEntregados').value),
-        millas parseInt(document.getElementById('millas').value),
-        combustible parseFloat(document.getElementById('combustible').value),
-        costos parseFloat(document.getElementById('costos').value)
-      };
-
-      const recordWithMetrics = calculateMetrics(newRecord);
-      appData.records.push(recordWithMetrics);
-      saveData();
-      updateUI();
-      closeModal('addModal');
-      
-       Show success feedback
-      showNotification('✅ Registro guardado correctamente');
-    });
-
-     Show notification
-    function showNotification(message) {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position fixed;
-        top 20px;
-        left 50%;
-        transform translateX(-50%);
-        background #10B981;
-        color white;
-        padding 12px 20px;
-        border-radius 8px;
-        font-weight 600;
-        z-index 2000;
-        animation slideIn 0.3s ease;
-      `;
-      notification.textContent = message;
-      document.body.appendChild(notification);
-      
-      setTimeout(() = {
-        notification.remove();
-      }, 3000);
-    }
-
-     Add CSS animation for notifications
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from { transform translateX(-50%) translateY(-100%); opacity 0; }
-        to { transform translateX(-50%) translateY(0); opacity 1; }
-      }
-    `;
-    document.head.appendChild(style);
-
-     PWA Installation
-    let deferredPrompt;
-    
-    window.addEventListener('beforeinstallprompt', (e) = {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('installBanner').style.display = 'block';
-    });
-
-    document.getElementById('installBanner').addEventListener('click', async () = {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-        document.getElementById('installBanner').style.display = 'none';
-      }
-    });
-
-     Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-        const CACHE_NAME = 'speedx-v1';
-        const urlsToCache = [
-          '',
-          'manifest.json'
-        ];
-
-        self.addEventListener('install', event = {
-          event.waitUntil(
-            caches.open(CACHE_NAME)
-              .then(cache = cache.addAll(urlsToCache))
-          );
-        });
-
-        self.addEventListener('fetch', event = {
-          event.respondWith(
-            caches.match(event.request)
-              .then(response = {
-                return response  fetch(event.request);
-              })
-          );
-        });
-      `;
-      
-      const blob = new Blob([swCode], {type 'applicationjavascript'});
-      const swUrl = URL.createObjectURL(blob);
-      
-      navigator.serviceWorker.register(swUrl)
-        .then(() = console.log('SW registered'))
-        .catch(() = console.log('SW registration failed'));
-    }
-
-     Initialize app
-    document.addEventListener('DOMContentLoaded', function() {
-      loadData();
-      
-       Auto-fill no entregados based on total and entregados
-      document.getElementById('entregados').addEventListener('input', function() {
-        const total = parseInt(document.getElementById('totalPaq').value)  0;
-        const entregados = parseInt(this.value)  0;
-        const noEntregados = Math.max(0, total - entregados);
-        document.getElementById('noEntregados').value = noEntregados;
-      });
-      
-      document.getElementById('totalPaq').addEventListener('input', function() {
-        const total = parseInt(this.value)  0;
-        const entregados = parseInt(document.getElementById('entregados').value)  0;
-        const noEntregados = Math.max(0, total - entregados);
-        document.getElementById('noEntregados').value = noEntregados;
-      });
-    });
-
-     Prevent zoom on double tap
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (event) {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd = 300) {
-        event.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, false);
-  script
-body
-html
-
-
+    <!-- KPIs Grid -->
+    <div cla
