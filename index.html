@@ -154,4 +154,393 @@
     </div>
 
     <!-- KPIs Grid -->
-    <div cla
+    <div class="kpi-grid">
+      <div class="kpi-card packages">
+        <span class="kpi-icon">📦</span>
+        <div class="kpi-value" id="totalPackages">22</div>
+        <div class="kpi-label">Paquetes</div>
+        <div class="kpi-subtitle" id="deliveryRate">95.5%</div>
+      </div>
+
+      <div class="kpi-card earnings">
+        <span class="kpi-icon">💰</span>
+        <div class="kpi-value" id="totalEarnings">$20.07</div>
+        <div class="kpi-label">Ganancias</div>
+        <div class="kpi-subtitle" id="margin">42.1%</div>
+      </div>
+
+      <div class="kpi-card deliveries">
+        <span class="kpi-icon">✅</span>
+        <div class="kpi-value" id="delivered">21</div>
+        <div class="kpi-label">Entregados</div>
+        <div class="kpi-subtitle">de 22 total</div>
+      </div>
+
+      <div class="kpi-card efficiency">
+        <span class="kpi-icon">🛣️</span>
+        <div class="kpi-value" id="totalMiles">160</div>
+        <div class="kpi-label">Millas</div>
+        <div class="kpi-subtitle" id="efficiency">7.62 paq/100mi</div>
+      </div>
+    </div>
+
+    <!-- Simple Chart -->
+    <div class="chart-container">
+      <div class="chart-title">📊 Rendimiento de Entregas</div>
+      <div class="simple-chart">
+        <div class="chart-bar delivered" id="deliveredBar" style="height:90%">
+          <div class="chart-label">Entregados</div>
+        </div>
+        <div class="chart-bar not-delivered" id="notDeliveredBar" style="height:10%">
+          <div class="chart-label">No Entregados</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-grid">
+      <button class="action-btn" onclick="openModal('addModal')">
+        <span class="action-icon">➕</span>
+        <span class="action-text">Agregar Día</span>
+      </button>
+
+      <button class="action-btn" onclick="openModal('statsModal')">
+        <span class="action-icon">📈</span>
+        <span class="action-text">Estadísticas</span>
+      </button>
+    </div>
+
+    <!-- Recent Records -->
+    <div class="data-table">
+      <div class="table-header">
+        <div class="table-title">📋 Registros Recientes</div>
+      </div>
+      <div id="recordsList"><!-- Records here --></div>
+    </div>
+
+    <!-- Additional Stats -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-value" id="avgPerMile">7.62</div>
+        <div class="stat-label">Paq/100mi</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="fuelEfficiency">2.44</div>
+        <div class="stat-label">Paq/Galón</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="costPerPackage">$1.09</div>
+        <div class="stat-label">Costo/Paq</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Record Modal -->
+  <div class="modal hidden" id="addModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">➕ Nuevo Registro</div>
+        <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
+      </div>
+      <form id="addForm" class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-input" id="fecha" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Paquetes</label>
+          <input type="number" class="form-input" id="totalPaq" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Precio por Paquete ($)</label>
+          <input type="number" step="0.01" class="form-input" id="precio" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zona</label>
+          <input type="text" class="form-input" id="zona" placeholder="Centro, Norte, etc.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Entregados</label>
+          <input type="number" class="form-input" id="entregados" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">No Entregados</label>
+          <input type="number" class="form-input" id="noEntregados" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Millas Totales</label>
+          <input type="number" class="form-input" id="millas" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Combustible (Galones)</label>
+          <input type="number" step="0.01" class="form-input" id="combustible" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Costos Totales ($)</label>
+          <input type="number" step="0.01" class="form-input" id="costos" required>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">💾 Guardar</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">❌ Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div class="modal hidden" id="statsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📈 Estadísticas Detalladas</div>
+        <button class="close-btn" onclick="closeModal('statsModal')">&times;</button>
+      </div>
+      <div id="detailedStats"><!-- content --></div>
+    </div>
+  </div>
+
+  <script>
+    /* App Data Storage (seed) */
+    let appData = {
+      records: [{
+        id: 1,
+        fecha: '2025-08-25',
+        totalPaq: 22,
+        precio: 2.67,
+        zona: 'Centro',
+        entregados: 21,
+        noEntregados: 1,
+        horaInicio: '10:00',
+        horaFinal: '17:00',
+        millas: 160,
+        combustible: 9,
+        costos: 24.03,
+        promedioMilla: 7.62,
+        promedioCombustible: 0.43,
+        gananciaReal: 20.07
+      }]
+    };
+
+    function loadData() {
+      const saved = localStorage.getItem('speedxData');
+      if (saved) appData = JSON.parse(saved);
+      updateUI();
+    }
+    function saveData() {
+      localStorage.setItem('speedxData', JSON.stringify(appData));
+    }
+
+    function calculateMetrics(record) {
+      const totalPaq = Number(record.totalPaq || 0);
+      const millas = Number(record.millas || 0);
+      const combustible = Number(record.combustible || 0);
+      const precio = Number(record.precio || 0);
+      const costos = Number(record.costos || 0);
+
+      return {
+        ...record,
+        promedioMilla: millas ? (totalPaq / millas * 100).toFixed(2) : "0.00",
+        promedioCombustible: combustible ? (totalPaq / combustible).toFixed(2) : "0.00",
+        gananciaReal: (precio * totalPaq - costos).toFixed(2)
+      };
+    }
+
+    function updateUI() {
+      const totals = appData.records.reduce((acc, r) => {
+        acc.totalPackages += Number(r.totalPaq || 0);
+        acc.totalDelivered += Number(r.entregados || 0);
+        acc.totalNotDelivered += Number(r.noEntregados || 0);
+        acc.totalMiles += Number(r.millas || 0);
+        acc.totalEarnings += Number(r.gananciaReal || 0);
+        acc.totalCosts += Number(r.costos || 0);
+        acc.totalRevenue += Number(r.precio || 0) * Number(r.totalPaq || 0);
+        return acc;
+      }, { totalPackages:0, totalDelivered:0, totalNotDelivered:0, totalMiles:0, totalEarnings:0, totalCosts:0, totalRevenue:0 });
+
+      document.getElementById('totalPackages').textContent = totals.totalPackages;
+      document.getElementById('totalEarnings').textContent = '$' + totals.totalEarnings.toFixed(2);
+      document.getElementById('delivered').textContent = totals.totalDelivered;
+      document.getElementById('totalMiles').textContent = totals.totalMiles;
+
+      const deliveryRate = totals.totalPackages ? (totals.totalDelivered / totals.totalPackages * 100).toFixed(1) : '0.0';
+      const margin = totals.totalRevenue ? (totals.totalEarnings / totals.totalRevenue * 100).toFixed(1) : '0.0';
+      const efficiency = totals.totalMiles ? (totals.totalPackages / totals.totalMiles * 100).toFixed(2) : '0.00';
+
+      document.getElementById('deliveryRate').textContent = deliveryRate + '%';
+      document.getElementById('margin').textContent = margin + '%';
+      document.getElementById('efficiency').textContent = efficiency + ' paq/100mi';
+
+      const deliveredPercent = totals.totalPackages ? (totals.totalDelivered / totals.totalPackages * 100) : 0;
+      const notDeliveredPercent = 100 - deliveredPercent;
+      document.getElementById('deliveredBar').style.height = Math.max(deliveredPercent, 5) + '%';
+      document.getElementById('notDeliveredBar').style.height = Math.max(notDeliveredPercent, 5) + '%';
+
+      document.getElementById('avgPerMile').textContent = efficiency;
+      const fuelSum = appData.records.reduce((s, r) => s + Number(r.combustible || 0), 0);
+      document.getElementById('fuelEfficiency').textContent = fuelSum ? (totals.totalPackages / fuelSum).toFixed(2) : '0.00';
+      document.getElementById('costPerPackage').textContent = '$' + (totals.totalPackages ? (totals.totalCosts / totals.totalPackages).toFixed(2) : '0.00');
+
+      updateRecordsList();
+    }
+
+    function updateRecordsList() {
+      const container = document.getElementById('recordsList');
+      const recent = appData.records.slice(-5).reverse();
+      container.innerHTML = recent.map(record => `
+        <div class="record-item">
+          <div class="record-header">
+            <div class="record-date">${formatDate(record.fecha)}</div>
+            <div class="record-earnings">$${record.gananciaReal}</div>
+          </div>
+          <div class="record-details">
+            <div>📦 ${record.totalPaq} paquetes</div>
+            <div>✅ ${record.entregados} entregados</div>
+            <div>🛣️ ${record.millas} millas</div>
+            <div>📍 ${record.zona || 'NA'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function formatDate(s) {
+      const d = new Date(s);
+      return d.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit' });
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+      document.getElementById(id).classList.add('open');
+      if (id === 'addModal') document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+      if (id === 'statsModal') updateDetailedStats();
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      el.classList.add('hidden'); el.classList.remove('open');
+      if (id === 'addModal') document.getElementById('addForm').reset();
+    }
+
+    function updateDetailedStats() {
+      const t = appData.records.reduce((a, r) => {
+        a.totalPackages += Number(r.totalPaq || 0);
+        a.totalDelivered += Number(r.entregados || 0);
+        a.totalMiles += Number(r.millas || 0);
+        a.totalEarnings += Number(r.gananciaReal || 0);
+        a.totalCosts += Number(r.costos || 0);
+        a.totalFuel += Number(r.combustible || 0);
+        return a;
+      }, { totalPackages:0, totalDelivered:0, totalMiles:0, totalEarnings:0, totalCosts:0, totalFuel:0 });
+
+      const avgEarningsPerDay = appData.records.length ? (t.totalEarnings / appData.records.length).toFixed(2) : '0.00';
+      const avgPackagesPerDay = appData.records.length ? (t.totalPackages / appData.records.length).toFixed(1) : '0.0';
+      const milesPerGallon = t.totalFuel ? (t.totalMiles / t.totalFuel).toFixed(2) : '0.00';
+
+      document.getElementById('detailedStats').innerHTML = `
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-value">${avgEarningsPerDay}</div><div class="stat-label">$ / día promedio</div></div>
+          <div class="stat-item"><div class="stat-value">${avgPackagesPerDay}</div><div class="stat-label">paq / día promedio</div></div>
+          <div class="stat-item"><div class="stat-value">${milesPerGallon}</div><div class="stat-label">millas / galón</div></div>
+        </div>
+        <div style="margin-top:20px; padding:15px; background:#F3F4F6; border-radius:8px;">
+          <h4 style="margin-bottom:10px; color:#374151;">📊 Resumen Total</h4>
+          <div style="font-size:.9rem; color:#6B7280; line-height:1.5;">
+            • Total días trabajados ${appData.records.length}<br>
+            • Total paquetes manejados ${t.totalPackages}<br>
+            • Tasa de entrega ${(t.totalPackages ? (t.totalDelivered / t.totalPackages * 100).toFixed(1) : '0.0')}%<br>
+            • Millas totales recorridas ${t.totalMiles}<br>
+            • Ganancias totales $${t.totalEarnings.toFixed(2)}<br>
+            • ROI promedio ${(t.totalCosts ? ((t.totalEarnings / t.totalCosts) * 100).toFixed(1) : '0.0')}%
+          </div>
+        </div>
+      `;
+    }
+
+    document.getElementById('addForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const newRecord = {
+        id: Date.now(),
+        fecha: document.getElementById('fecha').value,
+        totalPaq: parseInt(document.getElementById('totalPaq').value),
+        precio: parseFloat(document.getElementById('precio').value),
+        zona: document.getElementById('zona').value,
+        entregados: parseInt(document.getElementById('entregados').value),
+        noEntregados: parseInt(document.getElementById('noEntregados').value),
+        millas: parseInt(document.getElementById('millas').value),
+        combustible: parseFloat(document.getElementById('combustible').value),
+        costos: parseFloat(document.getElementById('costos').value)
+      };
+      const recordWithMetrics = calculateMetrics(newRecord);
+      appData.records.push(recordWithMetrics);
+      saveData();
+      updateUI();
+      closeModal('addModal');
+      showNotification('✅ Registro guardado correctamente');
+    });
+
+    function showNotification(message) {
+      const n = document.createElement('div');
+      n.style.cssText = `
+        position:fixed; top:20px; left:50%; transform:translateX(-50%);
+        background:#10B981; color:white; padding:12px 20px; border-radius:8px; font-weight:600; z-index:2000;
+      `;
+      n.textContent = message; document.body.appendChild(n);
+      setTimeout(()=>n.remove(),3000);
+    }
+
+    /* PWA Installation */
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); deferredPrompt = e;
+      document.getElementById('installBanner').style.display = 'block';
+    });
+    document.getElementById('installBanner').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        document.getElementById('installBanner').style.display = 'none';
+      }
+    });
+
+    /* Service Worker Registration */
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        const CACHE_NAME = 'speedx-v1';
+        const urlsToCache = ['./'];
+        self.addEventListener('install', event => {
+          event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+        });
+        self.addEventListener('fetch', event => {
+          event.respondWith(caches.match(event.request).then(r => r || fetch(event.request)));
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(()=>{});
+    }
+
+    /* Initialize app */
+    document.addEventListener('DOMContentLoaded', function() {
+      loadData();
+      document.getElementById('entregados').addEventListener('input', function() {
+        const total = parseInt(document.getElementById('totalPaq').value) || 0;
+        const entregados = parseInt(this.value) || 0;
+        const noEntregados = Math.max(0, total - entregados);
+        document.getElementById('noEntregados').value = noEntregados;
+      });
+      document.getElementById('totalPaq').addEventListener('input', function() {
+        const total = parseInt(this.value) || 0;
+        const entregados = parseInt(document.getElementById('entregados').value) || 0;
+        const noEntregados = Math.max(0, total - entregados);
+        document.getElementById('noEntregados').value = noEntregados;
+      });
+    });
+
+    /* Prevent zoom on double tap */
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) event.preventDefault();
+      lastTouchEnd = now;
+    }, false);
+  </script>
+</body>
+</html>
