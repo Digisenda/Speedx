@@ -2,565 +2,1396 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>CodiGo - Control & Códigos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>CodiGo - Control de Trabajo</title>
 
-  <!-- PWA Meta -->
+  <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#2563EB" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CodiGo" />
-  <!-- Manifest simplificado (sin íconos embebidos conflictivos) -->
-  <link rel="manifest" href='data:application/json,{"name":"CodiGo","short_name":"CodiGo","start_url":"./","display":"standalone","background_color":"%23ffffff","theme_color":"%232563EB"}'>
 
-  <!-- Favicon emoji -->
+  <!-- Manifest (embebido como data URL) -->
+  <link rel="manifest" href='data:application/json;charset=utf-8,{"name":"CodiGo Control de Trabajo","short_name":"CodiGo","description":"Dashboard de control de entregas y gestión de códigos","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#2563EB","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTkyIDE5MiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCBmaWxsPSIjMjU2M0VCIiB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIvPjx0ZXh0IHg9Ijk2IiB5PSIxMDAiIGZpbGw9IiNGRkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNjBweCI+🚚</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}' />
+
+  <!-- Icono (emoji fallback) -->
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚚</text></svg>'>
 
-  <!-- Supabase (v2) -->
-  <script src="https://esm.sh/@supabase/supabase-js@2"></script>
-
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
       background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      min-height:100vh;color:#111;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
-      user-select:none;padding:10px
+      min-height:100vh; color:#333; -webkit-font-smoothing:antialiased;
+      -webkit-tap-highlight-color:transparent; user-select:none;
     }
-    .app{max-width:780px;margin:0 auto}
-    .card{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1);padding:16px}
-    .header{text-align:center;margin-bottom:12px}
-    .header h1{color:#2563EB;font-size:1.7rem;margin-bottom:6px}
-    .muted{color:#6B7280}
+    .app-container { max-width:100vw; padding:10px; min-height:100vh; }
+    .header {
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:20px; padding:20px; margin-bottom:15px; text-align:center;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
+    }
+    .header h1 { color:#2563EB; font-size:1.8rem; font-weight:800; margin-bottom:5px; }
+    .header p { color:#6B7280; font-size:.9rem; }
 
-    .tabs{display:flex;gap:8px;margin:10px 0}
-    .tab-btn{flex:1;border:0;border-radius:12px;padding:12px;font-weight:700;cursor:pointer;background:#E5E7EB}
-    .tab-btn.active{background:#3B82F6;color:#fff}
+    /* Tabs Navigation */
+    .tabs-nav {
+      display:flex; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:8px; margin-bottom:15px; gap:4px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
+    }
+    .tab-btn {
+      flex:1; padding:12px 8px; border:none; border-radius:12px; cursor:pointer;
+      font-size:.9rem; font-weight:600; transition:.3s; background:transparent; color:#6B7280;
+    }
+    .tab-btn.active { background:#2563EB; color:white; }
+    .tab-btn:active { transform:scale(0.95); }
 
-    .grid{display:grid;gap:10px}
-    .kpis{grid-template-columns:repeat(2,1fr);margin:12px 0}
-    .kpi .v{font-size:1.6rem;font-weight:800;color:#111}
-    .kpi .l{font-size:.8rem;color:#6B7280}
-    .actions{grid-template-columns:repeat(2,1fr);margin:12px 0}
-    button.btn{border:0;border-radius:12px;padding:14px 12px;font-weight:700;cursor:pointer}
-    .btn-primary{background:#3B82F6;color:#fff}
-    .btn-ghost{background:#E5E7EB;color:#111}
-    .btn-small{padding:6px 10px;border-radius:8px;font-weight:600;border:0;cursor:pointer}
-    .btn-copy{background:#10B981;color:#fff}
-    .btn-share{background:#6366F1;color:#fff}
-    .btn-favorite{background:#F59E0B;color:#fff}
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
 
-    .list .row{background:#F9FAFB;border-left:4px solid #3B82F6;border-radius:10px;padding:12px;margin:8px 0}
-    .row h4{display:flex;justify-content:space-between;margin-bottom:6px}
-    .row small{color:#6B7280}
+    /* Date Filters */
+    .date-filters {
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:15px; margin-bottom:15px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
+    }
+    .filter-grid { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end; }
+    .filter-group { display:flex; flex-direction:column; gap:4px; }
+    .filter-label { font-size:.8rem; color:#6B7280; font-weight:500; }
+    .filter-input { border:2px solid #E5E7EB; border-radius:8px; padding:8px; font-size:.9rem; }
+    .filter-btn { background:#2563EB; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:.8rem; font-weight:600; cursor:pointer; }
 
-    .install{background:linear-gradient(90deg,#3B82F6,#1D4ED8);color:#fff;margin-bottom:12px}
+    .kpi-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+    .kpi-card {
+      --accent-color:#3B82F6;
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:20px 15px; text-align:center; position:relative; overflow:hidden;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
+    }
+    .kpi-card.packages { --accent-color:#3B82F6; }
+    .kpi-card.earnings { --accent-color:#10B981; }
+    .kpi-card.deliveries { --accent-color:#8B5CF6; }
+    .kpi-card.efficiency { --accent-color:#F59E0B; }
+    .kpi-card::before { content:""; position:absolute; top:0; left:0; right:0; height:4px; background:var(--accent-color); }
+    .kpi-icon { font-size:2.5rem; margin-bottom:8px; display:block; }
+    .kpi-value { font-size:1.8rem; font-weight:700; color:#1F2937; margin-bottom:4px; }
+    .kpi-label { font-size:.8rem; color:#6B7280; margin-bottom:4px; }
+    .kpi-subtitle { font-size:.7rem; color:#10B981; font-weight:600; }
 
-    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);padding:16px;z-index:1000}
-    .modal.open{display:flex}
-    .form{display:grid;gap:10px}
-    .form label{font-weight:600}
-    .form input,.form textarea,.form select{width:100%;padding:10px;border:2px solid #E5E7EB;border-radius:8px}
-    .section{margin-top:10px}
-    .section h3{margin-bottom:8px}
+    .chart-container {
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:20px 15px; margin-bottom:20px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
+    }
+    .chart-title { font-size:1.1rem; font-weight:600; color:#1F2937; margin-bottom:15px; text-align:center; }
+    .simple-chart { height:150px; display:flex; align-items:flex-end; justify-content:space-around; padding:10px; }
+    .chart-bar { border-radius:4px 4px 0 0; min-width:30px; position:relative; margin:0 2px; }
+    .chart-bar.delivered { background:linear-gradient(to top,#10B981,#34D399); }
+    .chart-bar.not-delivered { background:linear-gradient(to top,#EF4444,#F87171); }
+    .chart-label {
+      position:absolute; bottom:-25px; left:50%; transform:translateX(-50%);
+      font-size:.7rem; color:#6B7280; white-space:nowrap;
+    }
 
-    .subtabs{display:flex;gap:8px;margin:10px 0}
-    .subtab-btn{flex:1;border:0;border-radius:10px;padding:10px;font-weight:700;background:#E5E7EB}
-    .subtab-btn.active{background:#1D4ED8;color:#fff}
+    .actions-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+    .action-btn {
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border:none; border-radius:16px; padding:20px; display:flex; flex-direction:column;
+      align-items:center; gap:8px; box-shadow:0 8px 32px rgba(0,0,0,0.1);
+      cursor:pointer; transition:.3s; text-decoration:none; color:inherit;
+    }
+    .action-btn:active { transform:scale(0.95); box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+    .action-icon { font-size:2rem; }
+    .action-text { font-size:.9rem; font-weight:600; color:#1F2937; }
 
-    @media(max-width:360px){.kpis,.actions{grid-template-columns:1fr}}
+    .data-table {
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:15px; box-shadow:0 8px 32px rgba(0,0,0,0.1); margin-bottom:20px;
+    }
+    .table-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+    .table-title { font-size:1.1rem; font-weight:600; color:#1F2937; }
+
+    .record-item { background:#F9FAFB; border-radius:12px; padding:15px; margin-bottom:10px; border-left:4px solid #3B82F6; }
+    .record-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .record-date { font-weight:600; color:#1F2937; }
+    .record-earnings { font-weight:700; color:#10B981; }
+    .record-details { display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:.8rem; color:#6B7280; }
+
+    /* CodiGo Specific Styles */
+    .codigo-tabs { display:flex; gap:8px; margin-bottom:15px; }
+    .codigo-tab-btn {
+      flex:1; padding:10px; border:none; border-radius:12px; cursor:pointer;
+      font-size:.9rem; font-weight:600; background:#E5E7EB; color:#374151; transition:.3s;
+    }
+    .codigo-tab-btn.active { background:#3B82F6; color:white; }
+
+    .search-bar {
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:16px; padding:15px; margin-bottom:15px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.1);
+    }
+    .search-input {
+      width:100%; border:2px solid #E5E7EB; border-radius:8px; padding:12px;
+      font-size:1rem; transition:border-color .3s;
+    }
+    .search-input:focus { outline:none; border-color:#3B82F6; }
+
+    .condominio-item {
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:12px; padding:15px; margin-bottom:10px;
+      box-shadow:0 4px 16px rgba(0,0,0,0.1); border-left:4px solid #10B981;
+    }
+    .condominio-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .condominio-name { font-weight:700; color:#1F2937; }
+    .codigo-badge {
+      background:#10B981; color:white; padding:6px 12px; border-radius:20px;
+      font-size:.8rem; font-weight:600; font-family:monospace;
+    }
+    .condominio-details { font-size:.9rem; color:#6B7280; line-height:1.4; margin-bottom:10px; }
+    .condominio-actions { display:flex; gap:8px; }
+    .btn-small {
+      padding:6px 12px; border:none; border-radius:6px; font-size:.8rem; font-weight:600;
+      cursor:pointer; transition:.3s;
+    }
+    .btn-copy { background:#3B82F6; color:white; }
+    .btn-share { background:#10B981; color:white; }
+    .btn-favorite { background:#F59E0B; color:white; }
+
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; }
+    .modal.open { display:flex; }
+    .modal-content { background:#fff; border-radius:16px; padding:20px; width:100%; max-width:400px; max-height:80vh; overflow-y:auto; }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+    .modal-title { font-size:1.2rem; font-weight:600; color:#1F2937; }
+    .close-btn { background:none; border:none; font-size:1.5rem; cursor:pointer; color:#6B7280; }
+
+    .form-grid { display:grid; gap:15px; }
+    .form-group { display:flex; flex-direction:column; gap:5px; }
+    .form-label { font-size:.9rem; font-weight:500; color:#374151; }
+    .form-input { border:2px solid #E5E7EB; border-radius:8px; padding:12px; font-size:1rem; transition:border-color .3s; }
+    .form-input:focus { outline:none; border-color:#3B82F6; }
+
+    .form-actions { display:flex; gap:10px; margin-top:20px; }
+    .btn { border:none; border-radius:8px; padding:12px 20px; font-size:1rem; font-weight:600; cursor:pointer; transition:.3s; flex:1; }
+    .btn-primary { background:#3B82F6; color:#fff; }
+    .btn-primary:active { background:#2563EB; }
+    .btn-secondary { background:#E5E7EB; color:#374151; }
+    .btn-secondary:active { background:#D1D5DB; }
+
+    .hidden { display:none !important; }
+
+    .stats-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-top:20px; }
+    .stat-item { background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); border-radius:12px; padding:15px; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+    .stat-value { font-size:1.2rem; font-weight:700; color:#1F2937; }
+    .stat-label { font-size:.7rem; color:#6B7280; margin-top:4px; }
+
+    .install-banner {
+      background:linear-gradient(90deg,#3B82F6,#1D4ED8); color:#fff; padding:15px; border-radius:12px; margin-bottom:20px; text-align:center; position:relative; overflow:hidden;
+    }
+    .install-banner::before { content:'📱'; position:absolute; right:-10px; top:50%; transform:translateY(-50%); font-size:3rem; opacity:.3; }
+    .install-text { font-weight:600; margin-bottom:8px; }
+    .install-description { font-size:.8rem; opacity:.9; }
+
+    .offline-badge {
+      background:#F59E0B; color:white; padding:4px 8px; border-radius:12px;
+      font-size:.7rem; font-weight:600; position:fixed; top:10px; right:10px; z-index:100;
+    }
+
+    .toast {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+      background:#10B981; color:white; padding:12px 20px; border-radius:8px;
+      font-weight:600; z-index:2000; font-size:.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width:480px){
+      .filter-grid { grid-template-columns:1fr; }
+      .filter-grid > div:last-child { display:flex; gap:8px; }
+      .filter-grid > div:last-child button { flex:1; }
+    }
+    @media (max-width:360px){
+      .kpi-grid { grid-template-columns:1fr; }
+      .actions-grid { grid-template-columns:1fr; }
+      .stats-row { grid-template-columns:1fr 1fr; }
+    }
+    /* Dark mode */
     @media (prefers-color-scheme:dark){
-      body{background:linear-gradient(135deg,#1E293B 0%,#0F172A 100%)}
-      .card{background:rgba(30,41,59,.95);color:#F1F5F9}
-      .muted{color:#CBD5E1}
+      body { background:linear-gradient(135deg,#1E293B 0%,#0F172A 100%); color:#F1F5F9; }
+      .kpi-card,.chart-container,.action-btn,.data-table,.stat-item,.modal-content,.date-filters,.tabs-nav,.search-bar,.condominio-item { background:rgba(30,41,59,0.95); color:#F1F5F9; }
+      .kpi-value,.modal-title,.table-title,.record-date { color:#F1F5F9; }
+      .kpi-label,.kpi-subtitle,.record-details { color:#CBD5E1; }
     }
   </style>
 </head>
 <body>
-  <div class="app" id="app">
-    <!-- Banner instalación -->
-    <div class="card install" id="installBanner">
-      <strong>📲 ¡Instala CodiGo en tu móvil!</strong>
-      <div class="muted">Toca aquí para agregarla a tu pantalla de inicio</div>
+  <!-- Offline Indicator -->
+  <div class="offline-badge hidden" id="offlineIndicator">Sin conexión</div>
+
+  <div class="app-container" id="app">
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner">
+      <div class="install-text">¡Instala CodiGo en tu móvil!</div>
+      <div class="install-description">Acceso rápido desde tu pantalla de inicio</div>
     </div>
 
     <!-- Header -->
-    <div class="card header">
-      <h1>🏠 CodiGo</h1>
-      <div class="muted">Control de trabajo + gestión de códigos de acceso</div>
+    <div class="header">
+      <h1>🚚 CodiGo</h1>
+      <p>Control de Trabajo y Gestión de Códigos</p>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab(event,'control')">📊 Control</button>
-      <button class="tab-btn" onclick="switchTab(event,'codigo')">🔐 CodiGo</button>
+    <!-- Main Tabs Navigation -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('control', this)">📊 Control</button>
+      <button class="tab-btn" onclick="switchTab('codigo', this)">🏠 CodiGo</button>
     </div>
 
-    <!-- CONTROL TAB -->
-    <div id="tab_control">
-      <!-- Filtros de fecha -->
-      <div class="card">
-        <div class="grid" style="grid-template-columns:1fr 1fr;gap:8px">
-          <div>
-            <label class="muted">Fecha inicio</label>
-            <input type="date" id="f_inicio">
+    <!-- Control Tab (Original functionality) -->
+    <div id="controlTab" class="tab-content active">
+      <!-- Date Filters -->
+      <div class="date-filters">
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label class="filter-label">Fecha inicio</label>
+            <input type="date" class="filter-input" id="fechaInicio">
           </div>
-          <div>
-            <label class="muted">Fecha fin</label>
-            <input type="date" id="f_fin">
+          <div class="filter-group">
+            <label class="filter-label">Fecha fin</label>
+            <input type="date" class="filter-input" id="fechaFin">
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="filter-btn" onclick="applyDateFilter()">Filtrar</button>
+            <button class="filter-btn" style="background:#6B7280;" onclick="clearDateFilter()">Limpiar</button>
           </div>
         </div>
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="btn btn-primary" id="btnAplicar">Aplicar</button>
-          <button class="btn btn-ghost" id="btnLimpiar">Limpiar</button>
+      </div>
+
+      <!-- KPIs Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card packages">
+          <span class="kpi-icon">📦</span>
+          <div class="kpi-value" id="totalPackages">0</div>
+          <div class="kpi-label">Paquetes</div>
+          <div class="kpi-subtitle" id="deliveryRate">0%</div>
+        </div>
+
+        <div class="kpi-card earnings">
+          <span class="kpi-icon">💰</span>
+          <div class="kpi-value" id="totalEarnings">$0.00</div>
+          <div class="kpi-label">Gan. Reales</div>
+          <div class="kpi-subtitle" id="margin">0%</div>
+        </div>
+
+        <div class="kpi-card deliveries">
+          <span class="kpi-icon">✅</span>
+          <div class="kpi-value" id="delivered">0</div>
+          <div class="kpi-label">Entregados</div>
+          <div class="kpi-subtitle">de <span id="totalForDelivered">0</span></div>
+        </div>
+
+        <div class="kpi-card efficiency">
+          <span class="kpi-icon">🛣️</span>
+          <div class="kpi-value" id="totalMiles">0</div>
+          <div class="kpi-label">Millas</div>
+          <div class="kpi-subtitle" id="efficiency">0 paq/100mi</div>
         </div>
       </div>
 
-      <!-- KPIs -->
-      <div class="grid kpis">
-        <div class="card kpi"><div class="v" id="k_total">0</div><div class="l">Paquetes</div></div>
-        <div class="card kpi"><div class="v" id="k_entregados">0</div><div class="l">Entregados</div></div>
-        <div class="card kpi"><div class="v" id="k_millas">0</div><div class="l">Millas</div></div>
-        <div class="card kpi"><div class="v" id="k_gananciasTotales">$0.00</div><div class="l">Ganancias Totales</div></div>
-        <div class="card kpi"><div class="v" id="k_costos">$0.00</div><div class="l">Costos</div></div>
-        <div class="card kpi"><div class="v" id="k_gananciasReales">$0.00</div><div class="l">Ganancias Reales</div></div>
+      <!-- Additional earnings KPI -->
+      <div class="kpi-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="kpi-card earnings" style="--accent-color:#8B5CF6;">
+          <span class="kpi-icon">💵</span>
+          <div class="kpi-value" id="totalRevenue">$0.00</div>
+          <div class="kpi-label">Gan. Totales</div>
+          <div class="kpi-subtitle">Ingresos brutos</div>
+        </div>
+        <div class="kpi-card earnings" style="--accent-color:#EF4444;">
+          <span class="kpi-icon">💸</span>
+          <div class="kpi-value" id="totalCosts">$0.00</div>
+          <div class="kpi-label">Costos Tot.</div>
+          <div class="kpi-subtitle">Gastos operativos</div>
+        </div>
       </div>
 
-      <!-- Acciones -->
-      <div class="grid actions">
-        <button class="btn btn-primary" id="btnAdd">➕ Agregar Día</button>
-        <button class="btn btn-ghost" id="btnStats">📈 Estadísticas</button>
+      <!-- Simple Chart -->
+      <div class="chart-container">
+        <div class="chart-title">📊 Rendimiento de Entregas</div>
+        <div class="simple-chart">
+          <div class="chart-bar delivered" id="deliveredBar" style="height:90%">
+            <div class="chart-label">Entregados</div>
+          </div>
+          <div class="chart-bar not-delivered" id="notDeliveredBar" style="height:10%">
+            <div class="chart-label">No Entregados</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Registros recientes -->
-      <div class="card list">
-        <h3>📋 Registros recientes</h3>
-        <div id="records"></div>
+      <!-- Quick Actions -->
+      <div class="actions-grid">
+        <button class="action-btn" onclick="openModal('addModal')">
+          <span class="action-icon">➕</span>
+          <span class="action-text">Agregar Día</span>
+        </button>
+
+        <button class="action-btn" onclick="openModal('statsModal')">
+          <span class="action-icon">📈</span>
+          <span class="action-text">Estadísticas</span>
+        </button>
+      </div>
+
+      <!-- Recent Records -->
+      <div class="data-table">
+        <div class="table-header">
+          <div class="table-title">📋 Registros Recientes</div>
+        </div>
+        <div id="recordsList"><!-- Records here --></div>
+      </div>
+
+      <!-- Additional Stats -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-value" id="avgPerMile">0</div>
+          <div class="stat-label">Paq/100mi</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="fuelEfficiency">0</div>
+          <div class="stat-label">Paq/Galón</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="costPerPackage">$0</div>
+          <div class="stat-label">Costo/Paq</div>
+        </div>
       </div>
     </div>
 
-    <!-- CODIGO TAB -->
-    <div id="tab_codigo" style="display:none">
-      <div class="card">
-        <div class="subtabs">
-          <button class="subtab-btn active" onclick="switchCodigoTab(event,'actualizar')">✍️ Actualizar</button>
-          <button class="subtab-btn" onclick="switchCodigoTab(event,'obtener')">🔎 Obtener</button>
+    <!-- CodiGo Tab (New functionality) -->
+    <div id="codigoTab" class="tab-content">
+      <!-- CodiGo Sub-tabs -->
+      <div class="codigo-tabs">
+        <button class="codigo-tab-btn active" onclick="switchCodigoTab('actualizar', this)">✏️ Actualizar</button>
+        <button class="codigo-tab-btn" onclick="switchCodigoTab('obtener', this)">🔍 Obtener</button>
+      </div>
+
+      <!-- Actualizar Sub-tab -->
+      <div id="actualizarSubTab">
+        <div class="actions-grid">
+          <button class="action-btn" onclick="openModal('condominioModal')">
+            <span class="action-icon">🏠</span>
+            <span class="action-text">Condominio</span>
+          </button>
+          <button class="action-btn" onclick="openModal('lockerModal')">
+            <span class="action-icon">📦</span>
+            <span class="action-text">Locker</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Obtener Sub-tab -->
+      <div id="obtenerSubTab" class="hidden">
+        <!-- Search Bar -->
+        <div class="search-bar">
+          <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nombre, dirección o ZIP..." onkeyup="searchCondominios()">
         </div>
 
-        <!-- Subtab Actualizar -->
-        <div id="subtab_actualizar">
-          <div class="section">
-            <h3>Condominio</h3>
-            <form class="form" id="formCondominio">
-              <input type="text" id="c_nombre" placeholder="Nombre condominio" required>
-              <input type="text" id="c_direccion" placeholder="Dirección">
-              <input type="text" id="c_zip" placeholder="ZIP">
-              <input type="text" id="c_codigo" placeholder="Código de acceso" required>
-              <textarea id="c_notas" placeholder="Notas (opcional)"></textarea>
-              <div class="grid" style="grid-template-columns:1fr 1fr;gap:8px">
-                <input type="text" id="c_lat" placeholder="Latitud" readonly>
-                <input type="text" id="c_lng" placeholder="Longitud" readonly>
-              </div>
-              <div style="display:flex;gap:8px">
-                <button class="btn btn-ghost" type="button" id="btnGeo">📍 Usar mi ubicación</button>
-                <button class="btn btn-primary" type="submit">💾 Guardar Condominio</button>
-              </div>
-            </form>
-          </div>
-
-          <div class="section">
-            <h3>Locker (opcional)</h3>
-            <form class="form" id="formLocker">
-              <select id="lockerCondominio" required>
-                <option value="">Selecciona condominio…</option>
-              </select>
-              <input type="text" id="l_ubicacion" placeholder="Ubicación lockers">
-              <textarea id="l_notas" placeholder="Notas (opcional)"></textarea>
-              <div class="grid" style="grid-template-columns:1fr 1fr;gap:8px">
-                <input type="text" id="l_lat" placeholder="Latitud" readonly>
-                <input type="text" id="l_lng" placeholder="Longitud" readonly>
-              </div>
-              <div style="display:flex;gap:8px">
-                <button class="btn btn-ghost" type="button" id="btnGeoLocker">📍 Usar mi ubicación</button>
-                <button class="btn btn-primary" type="submit">💾 Guardar Locker</button>
-              </div>
-            </form>
-          </div>
+        <!-- Quick Actions for Obtener -->
+        <div class="actions-grid">
+          <button class="action-btn" onclick="loadRecientes()">
+            <span class="action-icon">🕐</span>
+            <span class="action-text">Recientes</span>
+          </button>
+          <button class="action-btn" onclick="loadFavoritos()">
+            <span class="action-icon">⭐</span>
+            <span class="action-text">Favoritos</span>
+          </button>
         </div>
 
-        <!-- Subtab Obtener -->
-        <div id="subtab_obtener" style="display:none">
-          <div class="form">
-            <input type="search" id="q" placeholder="Buscar por nombre / dirección / ZIP" />
+        <!-- Condominios List -->
+        <div class="data-table">
+          <div class="table-header">
+            <div class="table-title">🏠 Condominios</div>
           </div>
-          <div id="codigoList" class="section" style="margin-top:10px"><em class="muted">Sin resultados</em></div>
+          <div id="condominiosList"><!-- Condominios here --></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal de día -->
-  <div class="modal" id="modal">
-    <div class="card" style="max-width:420px;width:100%">
-      <h3 style="margin-bottom:10px">➕ Nuevo registro</h3>
-      <form class="form" id="form">
-        <div><label>Fecha</label><input type="date" id="f_fecha" required></div>
-        <div><label>Total paquetes</label><input type="number" id="f_total" required></div>
-        <div><label>Entregados</label><input type="number" id="f_entregados" required></div>
-        <div><label>Precio por paquete ($)</label><input type="number" step="0.01" id="f_precio" required></div>
-        <div><label>Millas</label><input type="number" id="f_millas" required></div>
-        <div><label>Combustible (gal)</label><input type="number" step="0.01" id="f_comb" required></div>
-        <div><label>Costos ($)</label><input type="number" step="0.01" id="f_costos" required></div>
-        <div style="display:flex;gap:8px;margin-top:6px">
-          <button class="btn btn-primary" type="submit">💾 Guardar</button>
-          <button class="btn btn-ghost" type="button" id="btnClose">Cancelar</button>
+  <!-- Add Record Modal -->
+  <div class="modal hidden" id="addModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">➕ Nuevo Registro</div>
+        <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
+      </div>
+      <form id="addForm" class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-input" id="fecha" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Paquetes</label>
+          <input type="number" class="form-input" id="totalPaq" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Precio por Paquete ($)</label>
+          <input type="number" step="0.01" class="form-input" id="precio" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zona</label>
+          <input type="text" class="form-input" id="zona" placeholder="Centro, Norte, etc.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Entregados</label>
+          <input type="number" class="form-input" id="entregados" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">No Entregados</label>
+          <input type="number" class="form-input" id="noEntregados" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Millas Totales</label>
+          <input type="number" class="form-input" id="millas" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Combustible (Galones)</label>
+          <input type="number" step="0.01" class="form-input" id="combustible" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Costos Totales ($)</label>
+          <input type="number" step="0.01" class="form-input" id="costos" required>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">💾 Guardar</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">❌ Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- Condominio Modal -->
+  <div class="modal hidden" id="condominioModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">🏠 Condominio</div>
+        <button class="close-btn" onclick="closeModal('condominioModal')">&times;</button>
+      </div>
+      <form id="condominioForm" class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nombre *</label>
+          <input type="text" class="form-input" id="condominioNombre" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dirección</label>
+          <input type="text" class="form-input" id="condiminioDireccion">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ZIP</label>
+          <input type="text" class="form-input" id="condominioZip" pattern="[0-9]{5}" maxlength="5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Código de Acceso *</label>
+          <input type="text" class="form-input" id="condiminioCodigo" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notas</label>
+          <textarea class="form-input" id="condominioNotas" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ubicación</label>
+          <div style="display:flex; gap:10px;">
+            <input type="number" step="any" class="form-input" id="condominioLat" placeholder="Latitud" style="flex:1;">
+            <input type="number" step="any" class="form-input" id="condominioLng" placeholder="Longitud" style="flex:1;">
+            <button type="button" class="btn btn-secondary" onclick="getCurrentLocation()" style="flex:0 0 auto; padding:12px;">📍</button>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">💾 Guardar</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('condominioModal')">❌ Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Locker Modal -->
+  <div class="modal hidden" id="lockerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📦 Locker</div>
+        <button class="close-btn" onclick="closeModal('lockerModal')">&times;</button>
+      </div>
+      <form id="lockerForm" class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Condominio</label>
+          <select class="form-input" id="lockerCondominio" required>
+            <option value="">Seleccionar condominio...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ubicación de Lockers</label>
+          <input type="text" class="form-input" id="lockerUbicacion" placeholder="ej. Lobby principal, entrada norte...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notas</label>
+          <textarea class="form-input" id="lockerNotas" rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">💾 Guardar</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('lockerModal')">❌ Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div class="modal hidden" id="statsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📈 Estadísticas Detalladas</div>
+        <button class="close-btn" onclick="closeModal('statsModal')">&times;</button>
+      </div>
+      <div id="detailedStats"><!-- content --></div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN (solo si se configuran las credenciales) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
-    /* ========= CONFIG ========= */
-    // Pon tus credenciales
-    const SUPABASE_URL = 'https://apntugtvxrmqokvfmfle.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwbnR1Z3R2eHJtcW9rdmZtZmxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4NDA4NTEsImV4cCI6MjA2OTQxNjg1MX0.bMSGz7cq4Zb8K_0faY15tZtT3JGj0-Kwpj1FRE7KjMY';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    /* 
+     * ✅ SOLUCIÓN 1: JavaScript Tradicional 
+     * Eliminado ES6 modules - Compatible con Android Chrome + GitHub Pages
+     * Etapa personal: sin login. anon key + policies abiertas. 
+     * Migrable a auth.uid() cuando se requiera multiusuario.
+     */
 
-    // Keys LocalStorage
-    const KEY_DATA = 'codigoAppData';
-    const KEY_QUEUE = 'codigoQueue';
+    // Supabase Configuration (TODO: Configurar con valores reales)
+    const SUPABASE_URL = 'https://your-project.supabase.co';
+    const SUPABASE_ANON_KEY = 'your-anon-key-here';
+    
+    let supabase = null;
+    
+    // Solo inicializar Supabase si las credenciales están configuradas
+    if (typeof supabase !== 'undefined' && SUPABASE_URL !== 'https://your-project.supabase.co' && SUPABASE_ANON_KEY !== 'your-anon-key-here') {
+      try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase initialized');
+      } catch (error) {
+        console.warn('Supabase initialization failed:', error);
+        supabase = null;
+      }
+    } else {
+      console.warn('Supabase not configured. Using offline mode only.');
+    }
 
-    /* ========= ESTADO ========= */
-    let appData = JSON.parse(localStorage.getItem(KEY_DATA) || JSON.stringify({
-      records: [], // días de trabajo
-      condominios: [], // cache lectura
-      favoritos: [] // ids locales
-    }));
-
-    const $ = s => document.querySelector(s);
-    const fmt2 = n => Number(n||0).toFixed(2);
-
-    /* ========= TABS ========= */
-    window.switchTab = function(e, tabName){
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      e.currentTarget.classList.add('active');
-      $('#tab_control').style.display = tabName === 'control' ? 'block':'none';
-      $('#tab_codigo').style.display = tabName === 'codigo' ? 'block':'none';
+    /* App Data Storage con migración de datos existentes */
+    let appData = {
+      records: [],
+      condominios: [],
+      lockers: []
     };
-    window.switchCodigoTab = function(e, subtab){
-      document.querySelectorAll('.subtab-btn').forEach(btn => btn.classList.remove('active'));
-      e.currentTarget.classList.add('active');
-      $('#subtab_actualizar').style.display = subtab === 'actualizar' ? 'block':'none';
-      $('#subtab_obtener').style.display = subtab === 'obtener' ? 'block':'none';
-    };
 
-    /* ========= CONTROL: FILTROS & KPIs ========= */
-    function applyFilters(){
-      const ini = $('#f_inicio').value ? new Date($('#f_inicio').value) : null;
-      const fin = $('#f_fin').value ? new Date($('#f_fin').value) : null;
+    let currentDateFilter = { inicio: null, fin: null };
+    let pendingOperations = [];
+    let isOnline = navigator.onLine;
 
-      const rows = appData.records.filter(r=>{
-        const d = new Date(r.fecha);
-        return (!ini || d >= ini) && (!fin || d <= fin);
+    // Network status monitoring
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    function handleOnline() {
+      isOnline = true;
+      document.getElementById('offlineIndicator').classList.add('hidden');
+      processPendingOperations();
+    }
+
+    function handleOffline() {
+      isOnline = false;
+      document.getElementById('offlineIndicator').classList.remove('hidden');
+    }
+
+    // ✅ MIGRACIÓN DE DATOS: speedxData -> codigoData
+    function loadData() {
+      try {
+        // Intentar cargar datos de CodiGo primero
+        const newData = localStorage.getItem('codigoData');
+        
+        if (newData) {
+          const parsed = JSON.parse(newData);
+          if (parsed.records) appData.records = parsed.records;
+          if (parsed.condominios) appData.condominios = parsed.condominios;
+          if (parsed.lockers) appData.lockers = parsed.lockers;
+          console.log('Datos CodiGo cargados:', appData.records.length, 'registros');
+        } else {
+          // Migrar datos de SPEEDX si existen
+          const oldData = localStorage.getItem('speedxData');
+          if (oldData) {
+            try {
+              const parsedOldData = JSON.parse(oldData);
+              if (parsedOldData.records) {
+                appData.records = parsedOldData.records.map(record => calculateMetrics(record));
+                saveData();
+                showToast('📦 Datos migrados de SPEEDX a CodiGo');
+                console.log('Migración completada:', appData.records.length, 'registros');
+              }
+            } catch (error) {
+              console.warn('Error migrando datos:', error);
+            }
+          }
+        }
+        
+        // Asegurar datos semilla si no hay registros
+        if (appData.records.length === 0) {
+          appData.records = [{
+            id: 1,
+            fecha: '2025-08-25',
+            totalPaq: 22,
+            precio: 2.67,
+            zona: 'Centro',
+            entregados: 21,
+            noEntregados: 1,
+            horaInicio: '10:00',
+            horaFinal: '17:00',
+            millas: 160,
+            combustible: 9,
+            costos: 24.03,
+            promedioMilla: 7.62,
+            promedioCombustible: 0.43,
+            gananciaReal: 20.07
+          }].map(record => calculateMetrics(record));
+          console.log('Datos semilla cargados');
+        }
+        
+        // Load pending operations
+        const pending = localStorage.getItem('codigoPending');
+        if (pending) {
+          try {
+            pendingOperations = JSON.parse(pending);
+          } catch (error) {
+            pendingOperations = [];
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+        showToast('❌ Error cargando datos');
+      }
+      
+      updateUI();
+      loadCondominiosFromSupabase();
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem('codigoData', JSON.stringify(appData));
+      } catch (error) {
+        console.warn('Error guardando datos:', error);
+        showToast('⚠️ Error guardando datos localmente');
+      }
+    }
+
+    function savePendingOperations() {
+      try {
+        localStorage.setItem('codigoPending', JSON.stringify(pendingOperations));
+      } catch (error) {
+        console.warn('Error guardando operaciones pendientes:', error);
+      }
+    }
+
+    async function processPendingOperations() {
+      if (!supabase || pendingOperations.length === 0) return;
+      
+      const processed = [];
+      for (let op of pendingOperations) {
+        try {
+          if (op.type === 'insert_condominio') {
+            await supabase.from('condominios').insert([op.data]);
+            processed.push(op);
+            showToast('✅ Condominio sincronizado');
+          } else if (op.type === 'insert_locker') {
+            await supabase.from('lockers').insert([op.data]);
+            processed.push(op);
+            showToast('✅ Locker sincronizado');
+          }
+        } catch (error) {
+          console.warn('Error procesando operación pendiente:', error);
+        }
+      }
+      
+      pendingOperations = pendingOperations.filter(op => !processed.includes(op));
+      savePendingOperations();
+      
+      if (processed.length > 0) {
+        loadCondominiosFromSupabase();
+      }
+    }
+
+    function calculateMetrics(record) {
+      const totalPaq = Number(record.totalPaq || 0);
+      const millas = Number(record.millas || 0);
+      const combustible = Number(record.combustible || 0);
+      const precio = Number(record.precio || 0);
+      const costos = Number(record.costos || 0);
+
+      return {
+        ...record,
+        promedioMilla: millas ? (totalPaq / millas * 100).toFixed(2) : "0.00",
+        promedioCombustible: combustible ? (totalPaq / combustible).toFixed(2) : "0.00",
+        gananciaReal: (precio * totalPaq - costos).toFixed(2)
+      };
+    }
+
+    function getFilteredRecords() {
+      if (!currentDateFilter.inicio && !currentDateFilter.fin) {
+        return appData.records;
+      }
+      
+      return appData.records.filter(record => {
+        const recordDate = new Date(record.fecha);
+        const inicio = currentDateFilter.inicio ? new Date(currentDateFilter.inicio) : null;
+        const fin = currentDateFilter.fin ? new Date(currentDateFilter.fin) : null;
+        
+        if (inicio && recordDate < inicio) return false;
+        if (fin && recordDate > fin) return false;
+        return true;
       });
-
-      const t = rows.reduce((a,r)=>({
-        total: a.total + (r.totalPaq||0),
-        entregados: a.entregados + (r.entregados||0),
-        millas: a.millas + (r.millas||0),
-        revenue: a.revenue + ((r.precio||0)*(r.totalPaq||0)),
-        costos: a.costos + (r.costos||0)
-      }), {total:0,entregados:0,millas:0,revenue:0,costos:0});
-
-      $('#k_total').textContent = t.total;
-      $('#k_entregados').textContent = t.entregados;
-      $('#k_millas').textContent = t.millas;
-      $('#k_gananciasTotales').textContent = '$'+fmt2(t.revenue);
-      $('#k_costos').textContent = '$'+fmt2(t.costos);
-      $('#k_gananciasReales').textContent = '$'+fmt2(t.revenue - t.costos);
-
-      renderRecords(rows);
-    }
-    $('#btnAplicar').onclick = applyFilters;
-    $('#btnLimpiar').onclick = ()=>{
-      $('#f_inicio').value = ''; $('#f_fin').value = '';
-      applyFilters();
-    };
-
-    function renderRecords(rows){
-      const cont = $('#records');
-      const last = [...rows].slice(-5).reverse();
-      cont.innerHTML = last.map(r=>(
-        `<div class="row">
-          <h4><span>${new Date(r.fecha).toLocaleDateString('es-ES')}</span><span>$${fmt2((r.precio*r.totalPaq)-r.costos)}</span></h4>
-          <small>📦 ${r.totalPaq} • ✅ ${r.entregados} • 🛣️ ${r.millas} • ⛽ ${fmt2(r.combustible)} • 💸 costos $${fmt2(r.costos)}</small>
-        </div>`
-      )).join('') || '<div class="row"><small>Sin registros</small></div>';
     }
 
-    /* ========= CONTROL: MODAL DÍA ========= */
-    const modal = $('#modal');
-    $('#btnAdd').onclick = ()=>{ modal.classList.add('open'); $('#f_fecha').value = new Date().toISOString().split('T')[0]; };
-    $('#btnClose').onclick = ()=>{ modal.classList.remove('open'); };
+    function updateUI() {
+      const records = getFilteredRecords();
+      const totals = records.reduce((acc, r) => {
+        acc.totalPackages += Number(r.totalPaq || 0);
+        acc.totalDelivered += Number(r.entregados || 0);
+        acc.totalNotDelivered += Number(r.noEntregados || 0);
+        acc.totalMiles += Number(r.millas || 0);
+        acc.totalEarnings += Number(r.gananciaReal || 0);
+        acc.totalCosts += Number(r.costos || 0);
+        acc.totalRevenue += Number(r.precio || 0) * Number(r.totalPaq || 0);
+        return acc;
+      }, { totalPackages:0, totalDelivered:0, totalNotDelivered:0, totalMiles:0, totalEarnings:0, totalCosts:0, totalRevenue:0 });
 
-    $('#form').addEventListener('submit',(e)=>{
-      e.preventDefault();
-      const r = {
-        id: Date.now(),
-        fecha: $('#f_fecha').value,
-        totalPaq: Number($('#f_total').value),
-        precio: Number($('#f_precio').value),
-        entregados: Number($('#f_entregados').value),
-        millas: Number($('#f_millas').value),
-        combustible: Number($('#f_comb').value),
-        costos: Number($('#f_costos').value)
-      };
-      appData.records.push(r);
-      localStorage.setItem(KEY_DATA, JSON.stringify(appData));
-      modal.classList.remove('open');
-      applyFilters();
-      toast('✅ Registro guardado');
-    });
+      // Update KPIs
+      document.getElementById('totalPackages').textContent = totals.totalPackages;
+      document.getElementById('totalEarnings').textContent = '$' + totals.totalEarnings.toFixed(2);
+      document.getElementById('delivered').textContent = totals.totalDelivered;
+      document.getElementById('totalForDelivered').textContent = totals.totalPackages;
+      document.getElementById('totalMiles').textContent = totals.totalMiles;
+      
+      // New KPIs
+      document.getElementById('totalRevenue').textContent = '$' + totals.totalRevenue.toFixed(2);
+      document.getElementById('totalCosts').textContent = '$' + totals.totalCosts.toFixed(2);
 
-    /* ========= CODIGO: SUPABASE ========= */
-    async function fetchCondominios(q=''){
-      // filtra en servidor si necesitas. De momento simple:
-      let query = sb.from('condominios').select('*').order('updated_at', { ascending:false }).limit(50);
-      if(q){
-        query = query.or(`nombre.ilike.%${q}%,direccion.ilike.%${q}%,zip.ilike.%${q}%`);
-      }
-      const { data, error } = await query;
-      if(error){ console.error(error); return []; }
-      return data || [];
+      const deliveryRate = totals.totalPackages ? (totals.totalDelivered / totals.totalPackages * 100).toFixed(1) : '0.0';
+      const margin = totals.totalRevenue ? (totals.totalEarnings / totals.totalRevenue * 100).toFixed(1) : '0.0';
+      const efficiency = totals.totalMiles ? (totals.totalPackages / totals.totalMiles * 100).toFixed(2) : '0.00';
+
+      document.getElementById('deliveryRate').textContent = deliveryRate + '%';
+      document.getElementById('margin').textContent = margin + '%';
+      document.getElementById('efficiency').textContent = efficiency + ' paq/100mi';
+
+      // Update chart
+      const deliveredPercent = totals.totalPackages ? (totals.totalDelivered / totals.totalPackages * 100) : 0;
+      const notDeliveredPercent = 100 - deliveredPercent;
+      document.getElementById('deliveredBar').style.height = Math.max(deliveredPercent, 5) + '%';
+      document.getElementById('notDeliveredBar').style.height = Math.max(notDeliveredPercent, 5) + '%';
+
+      // Update additional stats
+      document.getElementById('avgPerMile').textContent = efficiency;
+      const fuelSum = records.reduce((s, r) => s + Number(r.combustible || 0), 0);
+      document.getElementById('fuelEfficiency').textContent = fuelSum ? (totals.totalPackages / fuelSum).toFixed(2) : '0.00';
+      document.getElementById('costPerPackage').textContent = '$' + (totals.totalPackages ? (totals.totalCosts / totals.totalPackages).toFixed(2) : '0.00');
+
+      updateRecordsList(records);
     }
 
-    async function insertCondominio(payload){
-      // para etapa personal: anon key + policies abiertas
-      const { error } = await sb.from('condominios').insert(payload);
-      if(error) throw error;
-    }
-
-    async function insertLocker(payload){
-      const { error } = await sb.from('lockers').insert(payload);
-      if(error) throw error;
-    }
-
-    /* ========= CODIGO: UI & FLOW ========= */
-    // Subtab: Actualizar
-    $('#btnGeo').onclick = ()=>{
-      if(!navigator.geolocation) return toast('GPS no disponible');
-      navigator.geolocation.getCurrentPosition(
-        pos => { $('#c_lat').value = pos.coords.latitude; $('#c_lng').value = pos.coords.longitude; },
-        err => toast('Error GPS: '+err.message),
-        { enableHighAccuracy:true }
-      );
-    };
-    $('#btnGeoLocker').onclick = ()=>{
-      if(!navigator.geolocation) return toast('GPS no disponible');
-      navigator.geolocation.getCurrentPosition(
-        pos => { $('#l_lat').value = pos.coords.latitude; $('#l_lng').value = pos.coords.longitude; },
-        err => toast('Error GPS: '+err.message),
-        { enableHighAccuracy:true }
-      );
-    };
-
-    // Guardar Condominio
-    $('#formCondominio').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const payload = {
-        nombre: $('#c_nombre').value.trim(),
-        direccion: $('#c_direccion').value.trim() || null,
-        zip: $('#c_zip').value.trim() || null,
-        codigo_acceso: $('#c_codigo').value.trim(),
-        notas: $('#c_notas').value.trim() || null,
-        lat: $('#c_lat').value ? Number($('#c_lat').value) : null,
-        lng: $('#c_lng').value ? Number($('#c_lng').value) : null
-      };
-      if(!payload.nombre || !payload.codigo_acceso){ return toast('Nombre y código son obligatorios'); }
-
-      try{
-        await tryOnlineOrQueue({type:'insertCondominio', payload});
-        toast('✅ Condominio guardado');
-        // refrescar combos/listas
-        await reloadCondominiosCache();
-      }catch(err){
-        console.error(err); toast('❌ Error guardando condominio');
-      }
-    });
-
-    // Guardar Locker (FIX: NO parseInt para UUID)
-    $('#formLocker').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const payload = {
-        condominio_id: $('#lockerCondominio').value, // <-- UUID como string
-        ubicacion_lockers: $('#l_ubicacion').value.trim() || null,
-        notas: $('#l_notas').value.trim() || null,
-        lat: $('#l_lat').value ? Number($('#l_lat').value) : null,
-        lng: $('#l_lng').value ? Number($('#l_lng').value) : null
-      };
-      if(!payload.condominio_id){ return toast('Selecciona un condominio'); }
-
-      try{
-        await tryOnlineOrQueue({type:'insertLocker', payload});
-        toast('✅ Locker guardado');
-      }catch(err){
-        console.error(err); toast('❌ Error guardando locker');
-      }
-    });
-
-    // Subtab: Obtener
-    let qTimer = null;
-    $('#q').addEventListener('input', ()=>{
-      clearTimeout(qTimer);
-      qTimer = setTimeout(async ()=>{ await listCodigos($('#q').value.trim()); }, 250);
-    });
-
-    async function listCodigos(q){
-      const rows = q ? await fetchCondominios(q) : appData.condominios;
-      renderCodigos(rows);
-    }
-
-    function renderCodigos(rows){
-      const cont = $('#codigoList');
-      if(!rows || !rows.length){
-        cont.innerHTML = '<em class="muted">Sin resultados</em>';
-        return;
-      }
-      cont.innerHTML = rows.map(cond => `
-        <div class="row">
-          <h4>
-            <span>${escapeHtml(cond.nombre || '')}</span>
-            <span>${cond.zip || ''}</span>
-          </h4>
-          <small>📍 ${escapeHtml(cond.direccion || '—')}</small><br/>
-          <small>🔑 <strong>${escapeHtml(cond.codigo_acceso || '')}</strong></small>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="btn-small btn-copy" onclick="copyCode('${escapeAttr(cond.codigo_acceso || '')}')">Copiar</button>
-            <button class="btn-small btn-share" onclick="shareCode('${escapeAttr(cond.nombre || '')}','${escapeAttr(cond.codigo_acceso || '')}')">Compartir</button>
-            <!-- FIX FAVORITO: ID entre comillas por UUID -->
-            <button class="btn-small btn-favorite" onclick="toggleFavorite('${escapeAttr(cond.id)}')">⭐ Favorito</button>
+    function updateRecordsList(records) {
+      const container = document.getElementById('recordsList');
+      if (!container) return;
+      
+      const recent = records.slice(-5).reverse();
+      container.innerHTML = recent.map(record => `
+        <div class="record-item">
+          <div class="record-header">
+            <div class="record-date">${formatDate(record.fecha)}</div>
+            <div class="record-earnings">$${record.gananciaReal}</div>
+          </div>
+          <div class="record-details">
+            <div>📦 ${record.totalPaq} paquetes</div>
+            <div>✅ ${record.entregados} entregados</div>
+            <div>🛣️ ${record.millas} millas</div>
+            <div>🏃 ${record.zona || 'NA'}</div>
           </div>
         </div>
       `).join('');
     }
 
-    // favoritos locales
-    window.toggleFavorite = function(id){
-      if(!id) return;
-      const idx = appData.favoritos.indexOf(id);
-      if(idx>=0) appData.favoritos.splice(idx,1);
-      else appData.favoritos.push(id);
-      localStorage.setItem(KEY_DATA, JSON.stringify(appData));
-      toast('⭐ Favoritos actualizados');
-    };
-
-    window.copyCode = async function(code){
-      if(!code) return;
-      try{ await navigator.clipboard.writeText(code); toast('📋 Código copiado'); }
-      catch{ toast('No se pudo copiar'); }
-    };
-
-    window.shareCode = async function(nombre, code){
-      const text = `Acceso ${nombre}: ${code}`;
-      if(navigator.share){
-        try{ await navigator.share({ text }); }
-        catch{}
-      }else{
-        copyCode(text);
-      }
-    };
-
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
-    function escapeAttr(s){ return (s||'').replace(/['"\\]/g, m=>({ "'":"&#39;", '"':'&quot;', '\\':'\\\\' }[m])); }
-
-    /* ========= CACHE & SYNC ========= */
-    async function reloadCondominiosCache(){
-      const rows = await fetchCondominios('');
-      appData.condominios = rows;
-      localStorage.setItem(KEY_DATA, JSON.stringify(appData));
-      // llenar combo de lockers
-      const sel = $('#lockerCondominio');
-      sel.innerHTML = '<option value="">Selecciona condominio…</option>' + rows.map(r=>`<option value="${escapeAttr(r.id)}">${escapeHtml(r.nombre || '')}</option>`).join('');
-      // refrescar lista en obtener si está visible
-      if($('#subtab_obtener').style.display !== 'none'){ renderCodigos(rows); }
+    function formatDate(s) {
+      const d = new Date(s);
+      return d.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit' });
     }
 
-    async function tryOnlineOrQueue(op){
-      if(navigator.onLine){
-        if(op.type==='insertCondominio') return insertCondominio(op.payload);
-        if(op.type==='insertLocker') return insertLocker(op.payload);
+    // ✅ TAB SWITCHING FUNCTIONS - JavaScript Tradicional
+    function switchTab(tabName, element) {
+      // Update tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (element) element.classList.add('active');
+      
+      // Show/hide tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+        content.style.display = 'none';
+      });
+      
+      const targetTab = document.getElementById(tabName + 'Tab');
+      if (targetTab) {
+        targetTab.classList.add('active');
+        targetTab.style.display = 'block';
       }
-      // offline → encolar
-      const queue = JSON.parse(localStorage.getItem(KEY_QUEUE) || '[]');
-      queue.push(op);
-      localStorage.setItem(KEY_QUEUE, JSON.stringify(queue));
+      
+      if (tabName === 'codigo') {
+        loadCondominiosFromSupabase();
+        populateCondominioSelect();
+      }
+      
+      console.log('Switched to tab:', tabName);
     }
 
-    async function flushQueue(){
-      if(!navigator.onLine) return;
-      const queue = JSON.parse(localStorage.getItem(KEY_QUEUE) || '[]');
-      const rest = [];
-      for(const op of queue){
-        try{
-          if(op.type==='insertCondominio') await insertCondominio(op.payload);
-          else if(op.type==='insertLocker') await insertLocker(op.payload);
-        }catch(e){
-          console.warn('retry later', e); rest.push(op);
+    function switchCodigoTab(subTab, element) {
+      // Update sub-tab buttons
+      document.querySelectorAll('.codigo-tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (element) element.classList.add('active');
+      
+      // Show/hide content
+      const actualizarTab = document.getElementById('actualizarSubTab');
+      const obtenerTab = document.getElementById('obtenerSubTab');
+      
+      if (subTab === 'actualizar') {
+        actualizarTab.classList.remove('hidden');
+        obtenerTab.classList.add('hidden');
+      } else {
+        actualizarTab.classList.add('hidden');
+        obtenerTab.classList.remove('hidden');
+        loadCondominiosList();
+      }
+      
+      console.log('Switched to codigo sub-tab:', subTab);
+    }
+
+    // ✅ DATE FILTER FUNCTIONS
+    function applyDateFilter() {
+      const inicio = document.getElementById('fechaInicio').value;
+      const fin = document.getElementById('fechaFin').value;
+      
+      currentDateFilter = { inicio, fin };
+      updateUI();
+      showToast('✅ Filtro aplicado');
+      console.log('Date filter applied:', currentDateFilter);
+    }
+
+    function clearDateFilter() {
+      document.getElementById('fechaInicio').value = '';
+      document.getElementById('fechaFin').value = '';
+      currentDateFilter = { inicio: null, fin: null };
+      updateUI();
+      showToast('🗑️ Filtros limpiados - mostrando todos los datos');
+      console.log('Date filter cleared');
+    }
+
+    // ✅ MODAL FUNCTIONS
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('open');
+      
+      if (id === 'addModal') {
+        document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+      } else if (id === 'statsModal') {
+        updateDetailedStats();
+      } else if (id === 'lockerModal') {
+        populateCondominioSelect();
+      }
+      
+      console.log('Modal opened:', id);
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      
+      modal.classList.add('hidden');
+      modal.classList.remove('open');
+      
+      // Reset forms
+      if (id === 'addModal') {
+        const form = document.getElementById('addForm');
+        if (form) form.reset();
+      } else if (id === 'condominioModal') {
+        const form = document.getElementById('condominioForm');
+        if (form) form.reset();
+      } else if (id === 'lockerModal') {
+        const form = document.getElementById('lockerForm');
+        if (form) form.reset();
+      }
+      
+      console.log('Modal closed:', id);
+    }
+
+    // ✅ GEOLOCATION FUNCTION
+    function getCurrentLocation() {
+      if (!navigator.geolocation) {
+        showToast('❌ Geolocalización no disponible');
+        return;
+      }
+      
+      showToast('📍 Obteniendo ubicación...');
+      console.log('Getting current location...');
+      
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          
+          // Completar inputs de formulario
+          const latInput = document.getElementById('condominioLat');
+          const lngInput = document.getElementById('condominioLng');
+          
+          if (latInput) latInput.value = lat.toFixed(6);
+          if (lngInput) lngInput.value = lng.toFixed(6);
+          
+          showToast('✅ Ubicación obtenida');
+          console.log('Location obtained:', lat, lng);
+        },
+        (err) => {
+          console.warn('Geo error:', err.message);
+          showToast('❌ Error obteniendo ubicación');
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    // ✅ SUPABASE FUNCTIONS
+    async function loadCondominiosFromSupabase() {
+      if (!supabase) {
+        console.log('Supabase not configured, skipping load');
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('condominios')
+          .select('*')
+          .order('updated_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        appData.condominios = data || [];
+        saveData();
+        
+        console.log('Condominios loaded from Supabase:', appData.condominios.length);
+        
+        if (!document.getElementById('obtenerSubTab').classList.contains('hidden')) {
+          loadCondominiosList();
         }
-      }
-      localStorage.setItem(KEY_QUEUE, JSON.stringify(rest));
-      if(queue.length !== rest.length){
-        toast('🔄 Sincronizado');
-        await reloadCondominiosCache();
+      } catch (error) {
+        console.warn('Error cargando condominios:', error);
       }
     }
-    window.addEventListener('online', flushQueue);
 
-    /* ========= PWA INSTALL ========= */
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e)=>{
-      e.preventDefault(); deferredPrompt = e; $('#installBanner').style.display = 'block';
-    });
-    $('#installBanner').onclick = async ()=>{
-      if(!deferredPrompt) return;
-      deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null;
-      $('#installBanner').style.display='none';
-    };
+    async function saveCondominioToSupabase(condominioData) {
+      if (!supabase || !isOnline) {
+        // Add to pending operations
+        pendingOperations.push({
+          type: 'insert_condominio',
+          data: condominioData,
+          timestamp: Date.now()
+        });
+        savePendingOperations();
+        showToast('📦 Guardado offline - se sincronizará');
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('condominios')
+          .insert([condominioData])
+          .select();
+        
+        if (error) throw error;
+        
+        showToast('✅ Condominio guardado');
+        loadCondominiosFromSupabase();
+      } catch (error) {
+        console.warn('Error guardando condominio:', error);
+        // Add to pending operations as fallback
+        pendingOperations.push({
+          type: 'insert_condominio',
+          data: condominioData,
+          timestamp: Date.now()
+        });
+        savePendingOperations();
+        showToast('❌ Error guardando - reintentará offline');
+      }
+    }
 
-    /* ========= SW ========= */
-    if('serviceWorker' in navigator){
-      const code = `
-        const CACHE='codigo-v1';
-        self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./']))));
-        self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
+    function populateCondominioSelect() {
+      const select = document.getElementById('lockerCondominio');
+      if (!select) return;
+      
+      select.innerHTML = '<option value="">Seleccionar condominio...</option>';
+      
+      appData.condominios.forEach(cond => {
+        const option = document.createElement('option');
+        option.value = cond.id;
+        option.textContent = cond.nombre;
+        select.appendChild(option);
+      });
+    }
+
+    function loadCondominiosList() {
+      const container = document.getElementById('condominiosList');
+      if (!container) return;
+      
+      const condominios = appData.condominios;
+      
+      if (condominios.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#6B7280; padding:20px;">No hay condominios registrados</div>';
+        return;
+      }
+      
+      container.innerHTML = condominios.map(cond => `
+        <div class="condominio-item">
+          <div class="condominio-header">
+            <div class="condominio-name">${cond.nombre}</div>
+            <div class="codigo-badge">${cond.codigo_acceso}</div>
+          </div>
+          <div class="condominio-details">
+            ${cond.direccion ? `📍 ${cond.direccion}` : ''}
+            ${cond.zip ? ` • ZIP ${cond.zip}` : ''}
+            ${cond.notas ? `<br>📝 ${cond.notas}` : ''}
+          </div>
+          <div class="condominio-actions">
+            <button class="btn-small btn-copy" onclick="copyToClipboard('${cond.codigo_acceso}')">📋 Copiar</button>
+            <button class="btn-small btn-share" onclick="shareCode('${cond.nombre}', '${cond.codigo_acceso}')">📤 Compartir</button>
+            <button class="btn-small btn-favorite" onclick="toggleFavorite(${cond.id})">⭐ Favorito</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ✅ SEARCH FUNCTION
+    function searchCondominios() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      if (!query.trim()) {
+        loadCondominiosList();
+        return;
+      }
+      
+      const filtered = appData.condominios.filter(cond => 
+        cond.nombre.toLowerCase().includes(query) ||
+        (cond.direccion && cond.direccion.toLowerCase().includes(query)) ||
+        (cond.zip && cond.zip.includes(query))
+      );
+      
+      const container = document.getElementById('condominiosList');
+      if (!container) return;
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#6B7280; padding:20px;">No se encontraron resultados</div>';
+        return;
+      }
+      
+      container.innerHTML = filtered.map(cond => `
+        <div class="condominio-item">
+          <div class="condominio-header">
+            <div class="condominio-name">${cond.nombre}</div>
+            <div class="codigo-badge">${cond.codigo_acceso}</div>
+          </div>
+          <div class="condominio-details">
+            ${cond.direccion ? `📍 ${cond.direccion}` : ''}
+            ${cond.zip ? ` • ZIP ${cond.zip}` : ''}
+            ${cond.notas ? `<br>📝 ${cond.notas}` : ''}
+          </div>
+          <div class="condominio-actions">
+            <button class="btn-small btn-copy" onclick="copyToClipboard('${cond.codigo_acceso}')">📋 Copiar</button>
+            <button class="btn-small btn-share" onclick="shareCode('${cond.nombre}', '${cond.codigo_acceso}')">📤 Compartir</button>
+            <button class="btn-small btn-favorite" onclick="toggleFavorite(${cond.id})">⭐ Favorito</button>
+          </div>
+        </div>
+      `).join('');
+      
+      console.log('Search results:', filtered.length, 'items for query:', query);
+    }
+
+    // ✅ UTILITY FUNCTIONS FOR CODIGO
+    async function copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('📋 Código copiado');
+        console.log('Copied to clipboard:', text);
+      } catch (err) {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('📋 Código copiado');
+        console.log('Copied to clipboard (fallback):', text);
+      }
+    }
+
+    async function shareCode(nombre, codigo) {
+      const shareData = {
+        title: `Código de acceso - ${nombre}`,
+        text: `Código de acceso para ${nombre}: ${codigo}`,
+        url: window.location.href
+      };
+      
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          console.log('Shared successfully');
+        } catch (err) {
+          console.log('Share cancelled');
+        }
+      } else {
+        // Fallback - copy to clipboard
+        await copyToClipboard(`${shareData.text}`);
+      }
+    }
+
+    function toggleFavorite(id) {
+      // TODO: Implement favorites functionality
+      showToast('⭐ Función de favoritos en desarrollo');
+      console.log('Toggle favorite for ID:', id);
+    }
+
+    function loadRecientes() {
+      showToast('🕐 Cargando recientes...');
+      loadCondominiosList();
+      console.log('Loading recientes');
+    }
+
+    function loadFavoritos() {
+      showToast('⭐ Función de favoritos en desarrollo');
+      console.log('Loading favoritos');
+    }
+
+    function updateDetailedStats() {
+      const records = getFilteredRecords();
+      const t = records.reduce((a, r) => {
+        a.totalPackages += Number(r.totalPaq || 0);
+        a.totalDelivered += Number(r.entregados || 0);
+        a.totalMiles += Number(r.millas || 0);
+        a.totalEarnings += Number(r.gananciaReal || 0);
+        a.totalCosts += Number(r.costos || 0);
+        a.totalFuel += Number(r.combustible || 0);
+        return a;
+      }, { totalPackages:0, totalDelivered:0, totalMiles:0, totalEarnings:0, totalCosts:0, totalFuel:0 });
+
+      const avgEarningsPerDay = records.length ? (t.totalEarnings / records.length).toFixed(2) : '0.00';
+      const avgPackagesPerDay = records.length ? (t.totalPackages / records.length).toFixed(1) : '0.0';
+      const milesPerGallon = t.totalFuel ? (t.totalMiles / t.totalFuel).toFixed(2) : '0.00';
+
+      const container = document.getElementById('detailedStats');
+      if (!container) return;
+      
+      container.innerHTML = `
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-value">${avgEarningsPerDay}</div><div class="stat-label">$ / día promedio</div></div>
+          <div class="stat-item"><div class="stat-value">${avgPackagesPerDay}</div><div class="stat-label">paq / día promedio</div></div>
+          <div class="stat-item"><div class="stat-value">${milesPerGallon}</div><div class="stat-label">millas / galón</div></div>
+        </div>
+        <div style="margin-top:20px; padding:15px; background:#F3F4F6; border-radius:8px;">
+          <h4 style="margin-bottom:10px; color:#374151;">📊 Resumen Total</h4>
+          <div style="font-size:.9rem; color:#6B7280; line-height:1.5;">
+            • Total días trabajados ${records.length}<br>
+            • Total paquetes manejados ${t.totalPackages}<br>
+            • Tasa de entrega ${(t.totalPackages ? (t.totalDelivered / t.totalPackages * 100).toFixed(1) : '0.0')}%<br>
+            • Millas totales recorridas ${t.totalMiles}<br>
+            • Ganancias totales $${(t.totalEarnings + t.totalCosts).toFixed(2)}<br>
+            • Ganancias reales $${t.totalEarnings.toFixed(2)}<br>
+            • ROI promedio ${(t.totalCosts ? ((t.totalEarnings / t.totalCosts) * 100).toFixed(1) : '0.0')}%
+          </div>
+        </div>
       `;
-      const sw = URL.createObjectURL(new Blob([code],{type:'application/javascript'}));
-      navigator.serviceWorker.register(sw).catch(()=>{});
     }
 
-    /* ========= INIT ========= */
-    async function init(){
-      // Control
-      applyFilters();
-
-      // CodiGo
-      await reloadCondominiosCache();
-      $('#q').value = '';
-      await listCodigos('');
-
-      // Helpers UI
-      $('#btnStats').onclick = ()=>alert('Estadísticas detalladas próximamente.');
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+      console.log('Toast:', message);
     }
 
-    function toast(msg){
-      const n = document.createElement('div');
-      n.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:8px;z-index:2000;font-weight:700';
-      n.textContent = msg; document.body.appendChild(n);
-      setTimeout(()=>n.remove(),2500);
+    // ✅ EVENT LISTENERS SETUP
+    function setupEventListeners() {
+      // Add record form
+      const addForm = document.getElementById('addForm');
+      if (addForm) {
+        addForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          console.log('Adding new record...');
+          
+          const newRecord = {
+            id: Date.now(),
+            fecha: document.getElementById('fecha').value,
+            totalPaq: parseInt(document.getElementById('totalPaq').value),
+            precio: parseFloat(document.getElementById('precio').value),
+            zona: document.getElementById('zona').value,
+            entregados: parseInt(document.getElementById('entregados').value),
+            noEntregados: parseInt(document.getElementById('noEntregados').value),
+            millas: parseInt(document.getElementById('millas').value),
+            combustible: parseFloat(document.getElementById('combustible').value),
+            costos: parseFloat(document.getElementById('costos').value)
+          };
+          
+          const recordWithMetrics = calculateMetrics(newRecord);
+          appData.records.push(recordWithMetrics);
+          saveData();
+          updateUI();
+          closeModal('addModal');
+          showToast('✅ Registro guardado correctamente');
+        });
+      }
+
+      // Condominio form
+      const condominioForm = document.getElementById('condominioForm');
+      if (condominioForm) {
+        condominioForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          console.log('Adding new condominio...');
+          
+          const condominioData = {
+            nombre: document.getElementById('condominioNombre').value,
+            direccion: document.getElementById('condiminioDireccion').value,
+            zip: document.getElementById('condominioZip').value,
+            codigo_acceso: document.getElementById('condiminioCodigo').value,
+            notas: document.getElementById('condominioNotas').value,
+            lat: parseFloat(document.getElementById('condominioLat').value) || null,
+            lng: parseFloat(document.getElementById('condominioLng').value) || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          // Add to local data immediately
+          condominioData.id = Date.now(); // Temporary ID
+          appData.condominios.unshift(condominioData);
+          saveData();
+          
+          // Try to save to Supabase
+          saveCondominioToSupabase(condominioData);
+          
+          closeModal('condominioModal');
+          populateCondominioSelect();
+        });
+      }
+
+      // Auto-calculate no entregados
+      const entregadosInput = document.getElementById('entregados');
+      const totalPaqInput = document.getElementById('totalPaq');
+      
+      if (entregadosInput) {
+        entregadosInput.addEventListener('input', function() {
+          const total = parseInt(document.getElementById('totalPaq').value) || 0;
+          const entregados = parseInt(this.value) || 0;
+          const noEntregados = Math.max(0, total - entregados);
+          document.getElementById('noEntregados').value = noEntregados;
+        });
+      }
+      
+      if (totalPaqInput) {
+        totalPaqInput.addEventListener('input', function() {
+          const total = parseInt(this.value) || 0;
+          const entregados = parseInt(document.getElementById('entregados').value) || 0;
+          const noEntregados = Math.max(0, total - entregados);
+          document.getElementById('noEntregados').value = noEntregados;
+        });
+      }
+      
+      console.log('Event listeners setup completed');
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    /* ✅ PWA INSTALLATION */
+    let deferredPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.style.display = 'block';
+      console.log('PWA install prompt available');
+    });
+    
+    const installBanner = document.getElementById('installBanner');
+    if (installBanner) {
+      installBanner.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          installBanner.style.display = 'none';
+          console.log('PWA install triggered');
+        }
+      });
+    }
+
+    /* ✅ SERVICE WORKER REGISTRATION */
+    if ('serviceWorker' in navigator) {
+      try {
+        const swCode = `
+          const CACHE_NAME = 'codigo-v1';
+          const urlsToCache = ['./'];
+          self.addEventListener('install', event => {
+            event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+          });
+          self.addEventListener('fetch', event => {
+            event.respondWith(caches.match(event.request).then(r => r || fetch(event.request)));
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).then(() => {
+          console.log('Service Worker registered successfully');
+        }).catch((error) => {
+          console.warn('Service Worker registration failed:', error);
+        });
+      } catch (error) {
+        console.warn('Service Worker not supported:', error);
+      }
+    }
+
+    /* ✅ INITIALIZE APP */
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        console.log('CodiGo initializing...');
+        loadData();
+        setupEventListeners();
+        console.log('CodiGo initialized successfully');
+        
+        // Show success message
+        setTimeout(() => {
+          showToast('✅ CodiGo cargado correctamente');
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Error initializing CodiGo:', error);
+        showToast('❌ Error inicializando la aplicación');
+      }
+    });
+
+    /* Prevent zoom on double tap */
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) event.preventDefault();
+      lastTouchEnd = now;
+    }, false);
   </script>
 </body>
 </html>
